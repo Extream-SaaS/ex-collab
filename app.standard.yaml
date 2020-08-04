@@ -1,0 +1,7 @@
+runtime: nodejs12
+instance_class: F2
+
+env_variables:
+  PUBSUB_TOPIC: ex-collab
+  PUBSUB_VERIFICATION_TOKEN: SFwO64g5bLf30B6QPkcfEv7D
+  PARENT_ZONE: extream.app
