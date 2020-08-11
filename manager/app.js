@@ -62,13 +62,19 @@ app.post('/ex-collab/local-push', jsonBodyParser, async (req, res) => {
 
   const payload = JSON.parse(message);
   let resp;
+  let status;
   switch (payload.action) {
     case "create":
-      resp = await Create(payload);
+      try {
+        resp = await Create(payload);
+        status = 200;
+      } catch (error) {
+        resp = error.errors || { message: error.message, code: error.name };
+        status = error.code || 500;
+      }
       break;
   }
-
-  res.status(200).send(resp);
+  res.status(status).send(resp);
 });
 
 app.post('/ex-collab/push', jsonBodyParser, async (req, res) => {
