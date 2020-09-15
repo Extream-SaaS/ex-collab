@@ -1,0 +1,352 @@
+const Firestore = require('@google-cloud/firestore');
+const admin = require('firebase-admin');
+const projectId = 'stoked-reality-284921';
+
+const publish = (
+  topicName,
+  source,
+  data
+) => {
+  const {PubSub} = require('@google-cloud/pubsub');
+  // Instantiates a client
+  const pubsub = new PubSub({projectId});
+
+  async function publishMessage() {
+    const sourceStr = data ? `-${source}` : '';
+    const dataBuffer = Buffer.from(JSON.stringify(!data ? source : data));
+    console.log('pushing to', `${topicName}${sourceStr}`);
+    const messageId = await pubsub.topic(`${topicName}${sourceStr}`).publish(dataBuffer);
+    return messageId;
+  }
+
+  return publishMessage();
+};
+
+/**
+ * Triggered from a message on a Cloud Pub/Sub topic.
+ *
+ * @param {!Object} event Event payload.
+ * @param {!Object} context Metadata for the event.
+ */
+exports.manage = async (event, context, callback) => {
+  const message = event && event.data ? JSON.parse(Buffer.from(event.data, 'base64').toString()) : null;
+  if (message === null) {
+    callback();
+  }
+  const {domain, action, command, socketId, payload, user, source} = message;
+  const db = new Firestore({
+    projectId,
+  });
+  if (message.payload.start_date) {
+    message.payload.start_date = Firestore.Timestamp.fromDate(new Date(Date.parse(message.payload.start_date)));
+  }
+  if (message.payload.end_date) {
+    message.payload.end_date = Firestore.Timestamp.fromDate(new Date(Date.parse(message.payload.end_date)));
+  }
+  switch (command) {
+    case 'create':
+      try {
+        const docRef = db.collection('sessions').doc();
+    
+        await docRef.set({
+          ...payload,
+          addedBy: user.id,
+          addedAt: Firestore.FieldValue.serverTimestamp()
+        });
+   
+        await Promise.all([
+          publish('ex-manage', { domain, action, command, payload: { ...payload, id: docRef.id }, user, socketId }),
+          publish('ex-gateway', source, { domain, action, command, payload: { ...payload, id: docRef.id }, user, socketId })
+        ]);
+        callback();
+      } catch (error) {
+        await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
+        callback(0);
+      }
+      break;
+    case 'update':
+      try {
+        const docRef = db.collection('sessions').doc(payload.id);
+    
+        await docRef.set({
+          ...payload,
+          updatedBy: user.id,
+          updatedAt: Firestore.FieldValue.serverTimestamp()
+        }, {
+          merge: true
+        });
+    
+        await publish('ex-gateway', source, { domain, action, command, payload: { ...payload }, user, socketId });
+        callback();
+      } catch (error) {
+        await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
+        callback(0);
+      }
+      break;
+    case 'read':
+      try {
+        const docRef = db.collection('sessions').doc(payload.id);
+    
+        const session = await docRef.get();
+
+        if (!session.exists) {
+          throw new Error('item not found');
+        }
+    
+        await publish('ex-gateway', source, { domain, action, command, payload: session.data(), user, socketId });
+        callback();
+      } catch (error) {
+        await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
+        callback(0);
+      }
+      break;
+    case 'get':
+      try {
+        const docRef = db.collection('sessions').doc(payload.id);
+        const session = await docRef.get();
+
+        if (!session.exists) {
+          throw new Error('item not found');
+        }
+
+        let data = session.data();
+
+        if (domain === 'client') {
+          // we need to get all the instances and their statuses if we are an operator we can get all attendees
+          const instancesRef = docRef.collection('instances');
+          const instances = await instancesRef.get();
+          data.instances = {};
+          instances.forEach(async instance => {
+            data.instances[instance.id] = instance.data();
+          });
+        } else {
+          if (data.configuration.mode) {
+            // we need an instance ID
+            if (!payload.data.instance) {
+              throw new Error('instance is required');
+            }
+            const instanceRef = docRef.collection('instances').doc(payload.data.instance);
+            const instance = await instanceRef.get();
+            if (!instance.exists) {
+              throw new Error('instance not found');
+            }
+            data.instance = instance.data();
+            console.log('instance retrieved', payload.data.instance, data);
+          }
+        }
+    
+        await publish('ex-gateway', source, { domain, action, command, payload: { id: payload.id, ...data }, user, socketId });
+        callback();
+      } catch (error) {
+        await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
+        callback(0);
+      }
+      break;
+    case 'start':
+      try {
+        console.log('payload', payload);
+        const docRef = db.collection('sessions').doc(payload.id);
+        const session = await docRef.get();
+
+        if (!session.exists) {
+          throw new Error('item not found');
+        }
+
+        let data = session.data();
+
+        payload.data.operators = data.configuration.operators;
+    
+        const instanceRef = docRef.collection('instances').doc(payload.data.instance);
+
+        await instanceRef.set({
+          participants: [user],
+          status: 'pending',
+          addedBy: user.id,
+          addedAt: Firestore.FieldValue.serverTimestamp(),
+        });
+    
+        await publish('ex-gateway', source, { domain, action, command, payload: { ...payload }, user, socketId });
+        callback();
+      } catch (error) {
+        await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
+        callback(0);
+      }
+      break;
+    case 'activate':
+      // client activates and sets status to active
+      try {
+        if (domain !== 'client') {
+          callback(0);
+          return;
+        }
+        if (payload.data.instance) {
+          const docRef = db.collection('sessions').doc(payload.id);
+          const session = await docRef.get();
+
+          if (!session.exists) {
+            throw new Error('item not found');
+          }
+
+          let data = session.data();
+
+          payload.data.operators = data.configuration.operators;
+          const instanceRef = docRef.collection('instances').doc(payload.data.instance);
+          const curInstance = await instanceRef.get();
+          const curData = curInstance.data();
+          if (curData.participants.length >= data.configuration.max_participants) {
+            await instanceRef.set({
+              status: 'capacity_reached',
+              updatedBy: user.id,
+              updatedAt: Firestore.FieldValue.serverTimestamp(),
+            }, { merge: true });
+          } else {
+            await instanceRef.set({
+              status: 'active',
+              participants: admin.firestore.FieldValue.arrayUnion(user),
+              updatedBy: user.id,
+              updatedAt: Firestore.FieldValue.serverTimestamp(),
+            }, { merge: true });
+          }
+          const instance = await instanceRef.get();
+          payload.data.instance = instance.data();
+          payload.data.id = instance.id;
+        } else {
+          throw new Error('instance is required');
+        }
+        await publish('ex-gateway', source, { domain, action, command, payload: { ...payload }, user, socketId });
+        callback();
+      } catch (err) {
+        await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
+        callback(0);
+      }
+      break;
+    case 'accept':
+      // client activates and sets status to active
+      try {
+        if (domain !== 'consumer') {
+          callback(0);
+          return;
+        }
+        if (payload.data.instance) {
+          const docRef = db.collection('sessions').doc(payload.id);
+          const session = await docRef.get();
+
+          if (!session.exists) {
+            throw new Error('item not found');
+          }
+
+          let data = session.data();
+
+          payload.data.operators = data.configuration.operators;
+          const instanceRef = docRef.collection('instances').doc(payload.data.instance);
+          const curInstance = await instanceRef.get();
+          const curData = curInstance.data();
+          if (curData.participants.length >= data.configuration.max_participants) {
+            await instanceRef.set({
+              status: 'capacity_reached',
+              updatedBy: user.id,
+              updatedAt: Firestore.FieldValue.serverTimestamp(),
+            }, { merge: true });
+          } else {
+            await instanceRef.set({
+              status: 'active',
+              participants: admin.firestore.FieldValue.arrayUnion(user),
+              updatedBy: user.id,
+              updatedAt: Firestore.FieldValue.serverTimestamp(),
+            }, { merge: true });
+          }
+          const instance = await instanceRef.get();
+          payload.data.instance = instance.data();
+          payload.data.id = instance.id;
+        } else {
+          throw new Error('instance is required');
+        }
+        await publish('ex-gateway', source, { domain, action, command, payload: { ...payload }, user, socketId });
+        callback();
+      } catch (err) {
+        await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
+        callback(0);
+      }
+      break;
+    case 'leave':
+      // client activates and sets status to active
+      try {
+        if (domain !== 'consumer') {
+          callback(0);
+          return;
+        }
+        if (payload.data.instance) {
+          const docRef = db.collection('sessions').doc(payload.id);
+          const session = await docRef.get();
+
+          if (!session.exists) {
+            throw new Error('item not found');
+          }
+
+          let data = session.data();
+
+          payload.data.operators = data.configuration.operators;
+          const instanceRef = docRef.collection('instances').doc(payload.data.instance);
+          const curInstance = await instanceRef.get();
+          const curData = curInstance.data();
+          await instanceRef.set({
+            status: 'active',
+            participants: admin.firestore.FieldValue.arrayRemove(user),
+            updatedBy: user.id,
+            updatedAt: Firestore.FieldValue.serverTimestamp(),
+          }, { merge: true });
+          const instance = await instanceRef.get();
+          payload.data.instance = instance.data();
+          payload.data.id = instance.id;
+        } else {
+          throw new Error('instance is required');
+        }
+        await publish('ex-gateway', source, { domain, action, command, payload: { ...payload }, user, socketId });
+        callback();
+      } catch (err) {
+        await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
+        callback(0);
+      }
+      break;
+    case 'end':
+      // client activates and sets status to active
+      try {
+        if (domain !== 'consumer') {
+          callback(0);
+          return;
+        }
+        if (payload.data.instance) {
+          const docRef = db.collection('sessions').doc(payload.id);
+          const session = await docRef.get();
+
+          if (!session.exists) {
+            throw new Error('item not found');
+          }
+
+          let data = session.data();
+
+          payload.data.operators = data.configuration.operators;
+          const instanceRef = docRef.collection('instances').doc(payload.data.instance);
+          const curInstance = await instanceRef.get();
+          const curData = curInstance.data();
+          await instanceRef.set({
+            status: 'complete',
+            participants: [],
+            updatedBy: user.id,
+            updatedAt: Firestore.FieldValue.serverTimestamp(),
+          }, { merge: true });
+          const instance = await instanceRef.get();
+          payload.data.instance = instance.data();
+          payload.data.id = instance.id;
+        } else {
+          throw new Error('instance is required');
+        }
+        await publish('ex-gateway', source, { domain, action, command, payload: { ...payload }, user, socketId });
+        callback();
+      } catch (err) {
+        await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
+        callback(0);
+      }
+      break;
+  }
+};
