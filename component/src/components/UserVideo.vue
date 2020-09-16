@@ -29,7 +29,9 @@ export default {
 	methods: {
 		getConnectionData () {
 			const { connection } = this.streamManager.stream;
-			return JSON.parse(connection.data);
+			const clientData = JSON.parse(connection.data.split('%/%')[0]).clientData;
+			const serverData = JSON.parse(connection.data.split('%/%')[1]).serverData;
+			return { clientData, serverData };
 		},
 	},
 };

@@ -1,301 +1,217 @@
-var kurento = require('kurento-client');
-var express = require('express');
-var app = express();
-var path = require('path');
-var wsm = require('ws');
+/* CONFIGURATION */
+require('dotenv').config();
 
-app.set('port', process.env.PORT || 8080);
+const { OpenVidu, OpenViduRole } = require('openvidu-node-client');
 
-/*
- * Definition of constants
- */
+// Node imports
+const axios = require('axios');
+const express = require('express');
+const cors = require('cors')
+const http = require('http');
+const bodyParser = require('body-parser'); // Pull information from HTML POST (express4)
+const app = express(); // Create our app with express
 
-// will change dynamically \\
-const turnIp = '35.246.73.118';
-const ws_uri = "wss://demo-01.ex-collab.extream.app/kurento";
+// Server configuration
+app.use(cors());
 
-/*
- * Definition of global variables.
- */
+app.use(bodyParser.urlencoded({
+    'extended': 'true'
+})); // Parse application/x-www-form-urlencoded
+app.use(bodyParser.json()); // Parse application/json
+app.use(bodyParser.json({
+    type: 'application/vnd.api+json'
+})); // Parse application/vnd.api+json as json
 
-var composite = null;
-var mediaPipeline = null;
+// Listen (start app with node server.js)
+http.createServer(app).listen(process.env.SERVER_PORT);
 
-var idCounter = 0;
-var clients = {};
-var candidatesQueue = {};
-var kurentoClient = null;
+// Environment variable: URL where our OpenVidu server is listening
+const OPENVIDU_URL = process.env.OPENVIDU_URL;
+// Environment variable: secret shared with our OpenVidu server
+const OPENVIDU_SECRET = process.env.OPENVIDU_SECRET;
+// EXAUTH microservices URL
+const exauthURL = process.env.EXAUTH;
 
-function nextUniqueId() {
-    idCounter++;
-    return idCounter.toString();
-}
-/*
- * Server startup
- */
+// Entrypoint to OpenVidu Node Client SDK
+const OV = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
 
-var port = app.get('port');
-var server = app.listen(port, function()
-{
-    console.log('Mixing stream server started');
+// Collection to pair session names with OpenVidu Session objects
+const mapSessions = {};
+// Collection to pair session names with tokens
+const mapSessionNamesTokens = {};
+
+console.log(`App listening on http://localhost:${process.env.SERVER_PORT}`);
+
+/* CONFIGURATION */
+
+/* REST API */
+
+app.get('/auth/verify', async (req, res) => {
+    try {
+        if (req.headers.authorization.slice(0, 6) === 'Bearer') {
+            const token = req.headers.authorization.slice(7);
+            const resp = await verifyUser(token);
+            res.send(resp);
+        } else {
+            res.status(403).send({
+                message: 'Bearer required',
+            });
+        }
+    } catch (err) {
+        res.status(err.response.status).send(err.response.data);
+    }
 });
 
-var WebSocketServer = wsm.Server;
-var wss = new WebSocketServer(
-    {
-        server : server,
-        path : '/signaling'
-    }
-);
-
-/*
- * Management of WebSocket messages
- */
-wss.on('connection', function (ws) {
-    var sessionId = nextUniqueId();
-
-    console.log('Connection received with sessionId ' + sessionId);
-
-    ws.on('error', function (error) {
-        console.log('Connection ' + sessionId + ' error');
-        stop(sessionId);
-    });
-
-    ws.on('close', function () {
-        console.log('Connection ' + sessionId + ' closed');
-        stop(sessionId);
-    });
-
-    ws.on('message', function (_message) {
-        var message = JSON.parse(_message);
-
-        switch (message.id) {
-            case 'client':
-                addClient(ws, sessionId, message.sdpOffer, function (error, sdpAnswer) {
-                    if (error) {
-                        return ws.send(JSON.stringify({
-                            id: 'response',
-                            response: 'rejected',
-                            message: error
-                        }));
-                    }
-                    ws.send(JSON.stringify({
-                        id: 'response',
-                        response: 'accepted',
-                        sdpAnswer: sdpAnswer
-                    }));
-                });
-                break;
-
-            case 'stop':
-                stop(sessionId);
-                break;
-
-            case 'onIceCandidate':
-                onIceCandidate(sessionId, message.candidate);
-                break;
-
-            default:
-                ws.send(JSON.stringify({
-                    id: 'error',
-                    message: 'Invalid message ' + message
-                }));
-                break;
-        }
-    });
-});
-
-/*
- * Definition of functions
- */
-
-// Retrieve or create kurentoClient
-function getKurentoClient(callback) {
-    if (kurentoClient !== null) {
-        console.log("KurentoClient already created");
-        return callback(null, kurentoClient);
-    }
-
-    console.log('getting kurento', ws_uri);
-
-    kurento(ws_uri, function (error, _kurentoClient) {
-        console.log("creating kurento");
-        if (error) {
-            console.log("Coult not find media server at address " + ws_uri);
-            return callback("Could not find media server at address" + ws_uri +
-                ". Exiting with error " + error);
-        }
-        kurentoClient = _kurentoClient;
-        callback(null, kurentoClient);
-    });
-}
-
-// Retrieve or create mediaPipeline
-function getMediaPipeline(callback) {
-    if (mediaPipeline !== null) {
-        console.log("MediaPipeline already created");
-        return callback(null, mediaPipeline);
-    }
-    getKurentoClient(function (error, _kurentoClient) {
-        if (error) {
-            return callback(error);
-        }
-        _kurentoClient.create('MediaPipeline', function (error, _pipeline) {
-            console.log("creating MediaPipeline");
-            if (error) {
-                return callback(error);
-            }
-            mediaPipeline = _pipeline;
-            callback(null, mediaPipeline);
+// Get token (add new user to session)
+app.post('/sessions/token', async function (req, res) {
+    if (!isLogged(req.headers.authorization)) {
+        res.status(401).send({
+            message: 'User not logged in',
         });
-    });
-}
-
-// Retrieve or create composite hub
-function getComposite(callback) {
-    if (composite !== null) {
-        console.log("Composer already created");
-        return callback(null, composite, mediaPipeline);
-    }
-    getMediaPipeline(function (error, _pipeline) {
-        if (error) {
-            return callback(error);
-        }
-        _pipeline.create('Composite', function (error, _composite) {
-            console.log("creating Composite");
-            if (error) {
-                return callback(error);
-            }
-            composite = _composite;
-            callback(null, composite);
-        });
-    });
-}
-
-// Create a hub port
-function createHubPort(callback) {
-    getComposite(function (error, _composite) {
-        if (error) {
-            return callback(error);
-        }
-        _composite.createHubPort(function (error, _hubPort) {
-            console.info("Creating hubPort");
-            if (error) {
-                return callback(error);
-            }
-            callback(null, _hubPort);
-        });
-    });
-}
-
-// Create a webRTC end point
-function createWebRtcEndPoint(callback) {
-    getMediaPipeline(function (error, _pipeline) {
-        if (error) {
-            return callback(error);
-        }
-        console.log('get media pipeline');
-        _pipeline.create('WebRtcEndpoint', function (error, _webRtcEndpoint) {
-            console.info("Creating createWebRtcEndpoint");
-            if (error) {
-                return callback(error);
-            }
-            _webRtcEndpoint.setTurnUrl(`ex-collab:ExC0LLab@${turnIp}:3478`);
-            callback(null, _webRtcEndpoint);
-        });
-    });
-}
-
-// Add a webRTC client
-function addClient(ws, id, sdp, callback) {
-    createWebRtcEndPoint(function (error, _webRtcEndpoint) {
-        console.log('created endpoint');
-        if (error) {
-            console.log("Error creating WebRtcEndPoint " + error);
-            return callback(error);
-        }
-        if (candidatesQueue[id]) {
-            while (candidatesQueue[id].length) {
-                var candidate = candidatesQueue[id].shift();
-                _webRtcEndpoint.addIceCandidate(candidate);
-            }
-        }
-        clients[id] = {
-            id: id,
-            webRtcEndpoint: null,
-            hubPort: null
-        }
-        clients[id].webRtcEndpoint = _webRtcEndpoint;
-        clients[id].webRtcEndpoint.on('OnIceCandidate', function (event) {
-            var candidate = kurento.register.complexTypes.IceCandidate(event.candidate);
-            ws.send(JSON.stringify({
-                id: 'iceCandidate',
-                candidate: candidate
-            }));
-        });
-        console.log("sdp is ", sdp);
-        clients[id].webRtcEndpoint.processOffer(sdp, function (error, sdpAnswer) {
-            if (error) {
-                stop(id);
-                console.log("Error processing offer " + error);
-                return callback(error);
-            }
-            callback(null, sdpAnswer);
-        });
-        clients[id].webRtcEndpoint.gatherCandidates(function (error) {
-            if (error) {
-                return callback(error);
-            }
-        });
-        createHubPort(function (error, _hubPort) {
-            if (error) {
-                stop(id);
-                console.log("Error creating HubPort " + error);
-                return callback(error);
-            }
-            clients[id].hubPort = _hubPort;
-            clients[id].webRtcEndpoint.connect(clients[id].hubPort);
-            clients[id].hubPort.connect(clients[id].webRtcEndpoint);
-        });
-    });
-}
-
-// Stop and remove a webRTC client
-function stop(id) {
-    if (clients[id]) {
-        if (clients[id].webRtcEndpoint) {
-            clients[id].webRtcEndpoint.release();
-        }
-        if (clients[id].hubPort) {
-            clients[id].hubPort.release();
-        }
-        delete clients[id];
-    }
-    if (Object.getOwnPropertyNames(clients).length == 0) {
-        if (composite) {
-            composite.release();
-            composite = null;
-        }
-        if (mediaPipeline) {
-            mediaPipeline.release();
-            mediaPipeline = null;
-        }
-    }
-    delete candidatesQueue[id];
-}
-
-function onIceCandidate(sessionId, _candidate) {
-    var candidate = kurento.register.complexTypes.IceCandidate(_candidate);
-    if (clients[sessionId]) {
-        var webRtcEndpoint = clients[sessionId].webRtcEndpoint;
-        webRtcEndpoint.addIceCandidate(candidate);
     } else {
-        if (!candidatesQueue[sessionId]) {
-            candidatesQueue[sessionId] = [];
-        }
-        candidatesQueue[sessionId].push(candidate);
-    }
-}
+        try {
+            // The video-call to connect
+            const sessionName = req.body.sessionName;
 
-app.use(express.static(path.join(__dirname, 'static')));  
-module.exports = server
+            // Role associated to this user
+            const userToken = req.headers.authorization.slice(7);
+            const user = await verifyUser(userToken);
+
+            // Optional data to be passed to other users when this user connects to the video-call
+            // In this case, a JSON with the value we stored in the req.session object on login
+            const serverData = JSON.stringify({ serverData: user });
+
+            console.log(`Getting a token`, `{sessionName}={${sessionName}}`);
+
+            // Build tokenOptions object with the serverData and the role
+            const tokenOptions = {
+                data: serverData,
+                role: 'PUBLISHER'
+            };
+
+            if (mapSessions[sessionName]) {
+                // Session already exists
+                console.log('Existing session', sessionName);
+
+                // Get the existing Session from the collection
+                const session = mapSessions[sessionName];
+
+                // Generate a new token asynchronously with the recently created tokenOptions
+                session.generateToken(tokenOptions)
+                    .then(token => {
+
+                        // Store the new token in the collection of tokens
+                        mapSessionNamesTokens[sessionName].push(token);
+
+                        // Return the token to the client
+                        res.status(200).send({
+                            0: token
+                        });
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            } else {
+                // New session
+                console.log('New session', sessionName);
+
+                // Create a new OpenVidu Session asynchronously
+                OV.createSession()
+                    .then(session => {
+                        // Store the new Session in the collection of Sessions
+                        mapSessions[sessionName] = session;
+                        // Store a new empty array in the collection of tokens
+                        mapSessionNamesTokens[sessionName] = [];
+
+                        // Generate a new token asynchronously with the recently created tokenOptions
+                        session.generateToken(tokenOptions)
+                            .then(token => {
+
+                                // Store the new token in the collection of tokens
+                                mapSessionNamesTokens[sessionName].push(token);
+
+                                // Return the Token to the client
+                                res.status(200).send({
+                                    0: token
+                                });
+                            })
+                            .catch(error => {
+                                console.log('error generating token');
+                                console.log(error);
+                            });
+                    })
+                    .catch(error => {
+                        console.log('error generating session');
+                        console.log(error);
+                    });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+});
+
+// Remove user from session
+app.post('/sessions/remove-user', function (req, res) {
+    if (!isLogged(req.headers.authorization)) {
+        req.session.destroy();
+        res.status(401).send({
+            message: 'User not logged in',
+        });
+    } else {
+        // Retrieve params from POST body
+        const sessionName = req.body.sessionName;
+        const token = req.body.token;
+        console.log('Removing user | {sessionName, token}={' + sessionName + ', ' + token + '}');
+
+        // If the session exists
+        if (mapSessions[sessionName] && mapSessionNamesTokens[sessionName]) {
+            const tokens = mapSessionNamesTokens[sessionName];
+            const index = tokens.indexOf(token);
+
+            // If the token exists
+            if (index !== -1) {
+                // Token removed
+                tokens.splice(index, 1);
+                console.log(sessionName + ': ' + tokens.toString());
+            } else {
+                const msg = 'Problems in the app server: the TOKEN wasn\'t valid';
+                console.log(msg);
+                res.status(500).send(msg);
+            }
+            if (tokens.length == 0) {
+                // Last user left: session must be removed
+                console.log(sessionName + ' empty!');
+                delete mapSessions[sessionName];
+            }
+            res.status(200).send();
+        } else {
+            const msg = 'Problems in the app server: the SESSION does not exist';
+            console.log(msg);
+            res.status(500).send(msg);
+        }
+    }
+});
+
+/* REST API */
+
+
+
+/* AUXILIARY METHODS */
+
+const verifyUser = async (token) => {
+    const config = {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    };
+    const resp = await axios.get(`${exauthURL}/auth/user`, config);
+    if (resp.status !== 200) {
+        throw new Error('not logged in');
+    }
+    return resp.data;
+};
+async function isLogged(authorization) {
+    const token = authorization.slice(7);
+    return token.length > 0;
+}
