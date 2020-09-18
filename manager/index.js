@@ -154,17 +154,26 @@ exports.manage = async (event, context, callback) => {
 
         let data = session.data();
 
-        payload.data.operators = data.configuration.operators;
-    
         const instanceRef = docRef.collection('instances').doc(payload.data.instance);
 
-        await instanceRef.set({
-          participants: [user],
-          status: 'pending',
-          addedBy: user.id,
-          addedAt: Firestore.FieldValue.serverTimestamp(),
-        });
-    
+        if (data.configuration.mode === 'round-robin') {
+          payload.data.operators = data.configuration.operators;
+          await instanceRef.set({
+            participants: [user],
+            status: 'pending',
+            addedBy: user.id,
+            addedAt: Firestore.FieldValue.serverTimestamp(),
+          });
+        } else if (data.configuration.mode === 'instant' && payload.data.participants) {
+          await instanceRef.set({
+            participants: payload.data.participants,
+            status: 'pending',
+            addedBy: user.id,
+            addedAt: Firestore.FieldValue.serverTimestamp(),
+          });
+        } else if (data.configuration.mode === 'instant' && !payload.data.participants) {
+          throw new Error('participants required');
+        }
         await publish('ex-gateway', source, { domain, action, command, payload: { ...payload }, user, socketId });
         callback();
       } catch (error) {
@@ -221,7 +230,6 @@ exports.manage = async (event, context, callback) => {
       }
       break;
     case 'accept':
-      // client activates and sets status to active
       try {
         if (domain !== 'consumer') {
           callback(0);
@@ -269,7 +277,6 @@ exports.manage = async (event, context, callback) => {
       }
       break;
     case 'leave':
-      // client activates and sets status to active
       try {
         if (domain !== 'consumer') {
           callback(0);
