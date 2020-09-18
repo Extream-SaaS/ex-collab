@@ -294,8 +294,6 @@ exports.manage = async (event, context, callback) => {
 
           payload.data.operators = data.configuration.operators;
           const instanceRef = docRef.collection('instances').doc(payload.data.instance);
-          const curInstance = await instanceRef.get();
-          const curData = curInstance.data();
           await instanceRef.set({
             status: 'active',
             participants: admin.firestore.FieldValue.arrayRemove(user),
