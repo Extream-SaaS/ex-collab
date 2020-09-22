@@ -156,6 +156,8 @@ exports.manage = async (event, context, callback) => {
 
         const instanceRef = docRef.collection('instances').doc(payload.data.instance);
 
+        payload.data.mode = data.configuration.mode
+
         if (data.configuration.mode === 'round-robin') {
           payload.data.operators = data.configuration.operators;
           await instanceRef.set({
