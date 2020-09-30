@@ -170,8 +170,10 @@ exports.manage = async (event, context, callback) => {
         let data = session.data();
         const instancesRef = docRef.collection('instances');
         const instances = await instancesRef.get();
+        console.log('======== instance list count ========');
+        console.log(instances, instances.length);
         // if an instance already exists, and this is a group mode throw an error
-        if (instances.length > 0) {
+        if (instances.length > 0 && data.configuration.mode && data.configuration.mode === 'group') {
           payload.instance = instances[0].data();
           throw new Error('instance_exists');
         }
