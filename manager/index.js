@@ -120,7 +120,7 @@ exports.manage = async (event, context, callback) => {
             const instancesRef = docRef.collection('instances');
             const instances = await instancesRef.get();
             if (instances.size > 0) {
-              data.instance = instances[0];
+              data.instance = instances.docs[0];
             }
           } else {
             data.instances = {};
@@ -135,7 +135,7 @@ exports.manage = async (event, context, callback) => {
               // should only be 1 instance \\
               const instancesRef = docRef.collection('instances');
               const instances = await instancesRef.get();
-              data.instance = instances[0];
+              data.instance = instances.docs[0];
             } else if (!payload.data.instance) {
               throw new Error('instance is required');
             } else {
@@ -174,7 +174,7 @@ exports.manage = async (event, context, callback) => {
         console.log(instances, instances.size);
         // if an instance already exists, and this is a group mode throw an error
         if (instances.size > 0 && data.configuration.mode && data.configuration.mode === 'group') {
-          payload.instance = instances[0].data();
+          payload.instance = instances.docs[0].data();
           throw new Error('instance_exists');
         }
 
