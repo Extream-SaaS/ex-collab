@@ -115,10 +115,19 @@ exports.manage = async (event, context, callback) => {
           // we need to get all the instances and their statuses if we are an operator we can get all attendees
           const instancesRef = docRef.collection('instances');
           const instances = await instancesRef.get();
-          data.instances = {};
-          instances.forEach(async instance => {
-            data.instances[instance.id] = instance.data();
-          });
+          if (data.configuration.mode && data.configuration.mode === 'group') {
+            // should only be 1 instance \\
+            const instancesRef = docRef.collection('instances');
+            const instances = await instancesRef.get();
+            if (instances.length > 0) {
+              data.instance = instances[0];
+            }
+          } else {
+            data.instances = {};
+            instances.forEach(async instance => {
+              data.instances[instance.id] = instance.data();
+            });
+          }
         } else {
           if (data.configuration.mode) {
             // we need an instance ID
