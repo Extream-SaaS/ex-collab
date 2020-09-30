@@ -122,16 +122,25 @@ exports.manage = async (event, context, callback) => {
         } else {
           if (data.configuration.mode) {
             // we need an instance ID
-            if (!payload.data.instance) {
+            if (data.configuration.mode === 'group') {
+              // should only be 1 instance \\
+              const instancesRef = docRef.collection('instances');
+              const instances = await instancesRef.get();
+              data.instances = {};
+              instances.forEach(async instance => {
+                data.instances[instance.id] = instance.data();
+              });
+            } else if (!payload.data.instance) {
               throw new Error('instance is required');
+            } else {
+              const instanceRef = docRef.collection('instances').doc(payload.data.instance);
+              const instance = await instanceRef.get();
+              if (!instance.exists) {
+                throw new Error('instance not found');
+              }
+              data.instance = instance.data();
+              console.log('instance retrieved', payload.data.instance, data);
             }
-            const instanceRef = docRef.collection('instances').doc(payload.data.instance);
-            const instance = await instanceRef.get();
-            if (!instance.exists) {
-              throw new Error('instance not found');
-            }
-            data.instance = instance.data();
-            console.log('instance retrieved', payload.data.instance, data);
           }
         }
     
@@ -156,7 +165,7 @@ exports.manage = async (event, context, callback) => {
 
         const instanceRef = docRef.collection('instances').doc(payload.data.instance);
 
-        payload.data.mode = data.configuration.mode
+        payload.data.mode = data.configuration.mode;
 
         if (data.configuration.mode === 'round-robin') {
           payload.data.operators = data.configuration.operators;
@@ -175,6 +184,12 @@ exports.manage = async (event, context, callback) => {
           });
         } else if (data.configuration.mode === 'instant' && !payload.data.participants) {
           throw new Error('participants required');
+        } else if (data.configuration.mode === 'group') {
+          await instanceRef.set({
+            status: 'active',
+            addedBy: user.id,
+            addedAt: Firestore.FieldValue.serverTimestamp(),
+          });
         }
         await publish('ex-gateway', source, { domain, action, command, payload: { ...payload }, user, socketId });
         callback();
