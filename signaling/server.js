@@ -109,41 +109,15 @@ app.post('/sessions/token', async function (req, res) {
                         });
                     })
                     .catch(error => {
-                        console.log(error);
+                        console.log('creating session from scratch', error);
+                        createSession(res, sessionName);
                     });
             } else {
                 // New session
                 console.log('New session', sessionName);
 
                 // Create a new OpenVidu Session asynchronously
-                OV.createSession()
-                    .then(session => {
-                        // Store the new Session in the collection of Sessions
-                        mapSessions[sessionName] = session;
-                        // Store a new empty array in the collection of tokens
-                        mapSessionNamesTokens[sessionName] = [];
-
-                        // Generate a new token asynchronously with the recently created tokenOptions
-                        session.generateToken(tokenOptions)
-                            .then(token => {
-
-                                // Store the new token in the collection of tokens
-                                mapSessionNamesTokens[sessionName].push(token);
-
-                                // Return the Token to the client
-                                res.status(200).send({
-                                    0: token
-                                });
-                            })
-                            .catch(error => {
-                                console.log('error generating token');
-                                console.log(error);
-                            });
-                    })
-                    .catch(error => {
-                        console.log('error generating session');
-                        console.log(error);
-                    });
+                createSession(res, sessionName);
             }
         } catch (error) {
             console.log(error);
@@ -195,8 +169,6 @@ app.post('/sessions/remove-user', function (req, res) {
 
 /* REST API */
 
-
-
 /* AUXILIARY METHODS */
 
 const verifyUser = async (token) => {
@@ -214,4 +186,35 @@ const verifyUser = async (token) => {
 async function isLogged(authorization) {
     const token = authorization.slice(7);
     return token.length > 0;
+}
+
+const createSession = (res, sessionName) => {
+    OV.createSession()
+        .then(session => {
+            // Store the new Session in the collection of Sessions
+            mapSessions[sessionName] = session;
+            // Store a new empty array in the collection of tokens
+            mapSessionNamesTokens[sessionName] = [];
+
+            // Generate a new token asynchronously with the recently created tokenOptions
+            session.generateToken(tokenOptions)
+                .then(token => {
+
+                    // Store the new token in the collection of tokens
+                    mapSessionNamesTokens[sessionName].push(token);
+
+                    // Return the Token to the client
+                    res.status(200).send({
+                        0: token
+                    });
+                })
+                .catch(error => {
+                    console.log('error generating token');
+                    console.log(error);
+                });
+        })
+        .catch(error => {
+            console.log('error generating session');
+            console.log(error);
+        });
 }
