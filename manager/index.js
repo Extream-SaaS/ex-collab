@@ -173,8 +173,6 @@ exports.manage = async (event, context, callback) => {
         let data = session.data();
         const instancesRef = docRef.collection('instances');
         const instances = await instancesRef.get();
-        console.log('======== instance list count ========');
-        console.log(instances, instances.size);
         // if an instance already exists, and this is a group mode throw an error
         if (instances.size > 0 && data.configuration.mode && data.configuration.mode === 'group') {
           payload.instance = instances.docs[0].id;
@@ -281,6 +279,7 @@ exports.manage = async (event, context, callback) => {
           let data = session.data();
 
           payload.data.operators = data.configuration.operators;
+          payload.data.mode = data.configuration.mode;
           const instanceRef = docRef.collection('instances').doc(payload.data.instance);
           const curInstance = await instanceRef.get();
           const curData = curInstance.data();
