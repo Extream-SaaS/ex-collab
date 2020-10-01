@@ -299,7 +299,8 @@ exports.manage = async (event, context, callback) => {
             }, { merge: true });
           }
           const instance = await instanceRef.get();
-          payload.data.instance = instance.data();
+          const instanceId = payload.data.instance;
+          payload.data.instance = { ...instance.data(), id: instanceId };
           payload.data.id = instance.id;
         } else {
           throw new Error('instance is required');
