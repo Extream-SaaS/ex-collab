@@ -135,7 +135,9 @@ exports.manage = async (event, context, callback) => {
               // should only be 1 instance \\
               const instancesRef = docRef.collection('instances');
               const instances = await instancesRef.get();
-              data.instance = instances.docs[0].id;
+              if (instances.size > 0) {
+                data.instance = instances.docs[0].id;
+              }
             } else if (!payload.data.instance) {
               throw new Error('instance is required');
             } else {
@@ -153,6 +155,7 @@ exports.manage = async (event, context, callback) => {
         await publish('ex-gateway', source, { domain, action, command, payload: { id: payload.id, ...data }, user, socketId });
         callback();
       } catch (error) {
+        console.log(error);
         await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
         callback(0);
       }

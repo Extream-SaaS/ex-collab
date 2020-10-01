@@ -110,14 +110,14 @@ app.post('/sessions/token', async function (req, res) {
                     })
                     .catch(error => {
                         console.log('creating session from scratch', error);
-                        createSession(res, sessionName);
+                        createSession(res, sessionName, tokenOptions);
                     });
             } else {
                 // New session
                 console.log('New session', sessionName);
 
                 // Create a new OpenVidu Session asynchronously
-                createSession(res, sessionName);
+                createSession(res, sessionName, tokenOptions);
             }
         } catch (error) {
             console.log(error);
@@ -188,7 +188,7 @@ async function isLogged(authorization) {
     return token.length > 0;
 }
 
-const createSession = (res, sessionName) => {
+const createSession = (res, sessionName, tokenOptions) => {
     OV.createSession()
         .then(session => {
             // Store the new Session in the collection of Sessions
