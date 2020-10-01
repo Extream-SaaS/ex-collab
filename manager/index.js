@@ -203,6 +203,7 @@ exports.manage = async (event, context, callback) => {
         } else if (data.configuration.mode === 'group') {
           await instanceRef.set({
             status: 'active',
+            participants: [user],
             addedBy: user.id,
             addedAt: Firestore.FieldValue.serverTimestamp(),
           });
