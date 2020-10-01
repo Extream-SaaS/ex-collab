@@ -120,7 +120,7 @@ exports.manage = async (event, context, callback) => {
             const instancesRef = docRef.collection('instances');
             const instances = await instancesRef.get();
             if (instances.size > 0) {
-              data.instance = instances.docs[0].id;
+              data.instance = { id: instances.docs[0].id, ...instances.docs[0].data() };
             }
           } else {
             data.instances = {};
@@ -251,7 +251,7 @@ exports.manage = async (event, context, callback) => {
             }, { merge: true });
           }
           const instance = await instanceRef.get();
-          payload.data.instance = instance.data();
+          payload.data.instance = { ...instance.data(), id: instance.id };
           payload.data.id = instance.id;
         } else {
           throw new Error('instance is required');
@@ -337,7 +337,7 @@ exports.manage = async (event, context, callback) => {
             updatedAt: Firestore.FieldValue.serverTimestamp(),
           }, { merge: true });
           const instance = await instanceRef.get();
-          payload.data.instance = instance.data();
+          payload.data.instance = { ...instance.data(), id: instance.id };
           payload.data.id = instance.id;
         } else {
           throw new Error('instance is required');
@@ -376,7 +376,7 @@ exports.manage = async (event, context, callback) => {
             updatedAt: Firestore.FieldValue.serverTimestamp(),
           }, { merge: true });
           const instance = await instanceRef.get();
-          payload.data.instance = instance.data();
+          payload.data.instance = { ...instance.data(), id: instance.id };
           payload.data.id = instance.id;
           if (data.configuration && data.configuration.mode) {
             payload.data.mode = data.configuration.mode;
