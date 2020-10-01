@@ -235,6 +235,9 @@ exports.manage = async (event, context, callback) => {
           payload.data.operators = data.configuration.operators;
           const instanceRef = docRef.collection('instances').doc(payload.data.instance);
           const curInstance = await instanceRef.get();
+          if (!curInstance.exists) {
+            throw new Error('instance not found');
+          }
           const curData = curInstance.data();
           if (curData.participants.length >= data.configuration.max_participants) {
             await instanceRef.set({
@@ -283,6 +286,9 @@ exports.manage = async (event, context, callback) => {
           payload.data.mode = data.configuration.mode;
           const instanceRef = docRef.collection('instances').doc(payload.data.instance);
           const curInstance = await instanceRef.get();
+          if (!curInstance.exists) {
+            throw new Error('instance not found');
+          }
           const curData = curInstance.data();
           if (curData.participants && curData.participants.length >= data.configuration.max_participants) {
             await instanceRef.set({
@@ -330,6 +336,10 @@ exports.manage = async (event, context, callback) => {
 
           payload.data.operators = data.configuration.operators;
           const instanceRef = docRef.collection('instances').doc(payload.data.instance);
+          const curInstance = await instanceRef.get();
+          if (!curInstance.exists) {
+            throw new Error('instance not found');
+          }
           await instanceRef.set({
             participants: admin.firestore.FieldValue.arrayRemove(user),
             updatedBy: user.id,
@@ -366,6 +376,11 @@ exports.manage = async (event, context, callback) => {
           let data = session.data();
 
           const instanceRef = docRef.collection('instances').doc(payload.data.instance);
+          const curInstance = await instanceRef.get();
+          if (!curInstance.exists) {
+            throw new Error('instance not found');
+          }
+
           await instanceRef.set({
             status: 'complete',
             participants: [],
