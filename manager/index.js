@@ -283,7 +283,7 @@ exports.manage = async (event, context, callback) => {
           const instanceRef = docRef.collection('instances').doc(payload.data.instance);
           const curInstance = await instanceRef.get();
           const curData = curInstance.data();
-          if (curData.participants.length >= data.configuration.max_participants) {
+          if (curData.participants && curData.participants.length >= data.configuration.max_participants) {
             await instanceRef.set({
               status: 'capacity_reached',
               updatedBy: user.id,
