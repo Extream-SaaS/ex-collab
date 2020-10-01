@@ -136,7 +136,7 @@ exports.manage = async (event, context, callback) => {
               const instancesRef = docRef.collection('instances');
               const instances = await instancesRef.get();
               if (instances.size > 0) {
-                data.instance = instances.docs[0].id;
+                data.instance = { id: instances.docs[0].id, ...instances.docs[0].data() };
               }
             } else if (!payload.data.instance) {
               throw new Error('instance is required');
@@ -146,7 +146,7 @@ exports.manage = async (event, context, callback) => {
               if (!instance.exists) {
                 throw new Error('instance not found');
               }
-              data.instance = instance.data();
+              data.instance = { ...instance.data(), id: payload.data.instance };
               console.log('instance retrieved', payload.data.instance, data);
             }
           }
