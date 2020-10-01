@@ -366,7 +366,6 @@ exports.manage = async (event, context, callback) => {
 
           let data = session.data();
 
-          payload.data.operators = data.configuration.operators;
           const instanceRef = docRef.collection('instances').doc(payload.data.instance);
           const curInstance = await instanceRef.get();
           const curData = curInstance.data();
@@ -379,6 +378,12 @@ exports.manage = async (event, context, callback) => {
           const instance = await instanceRef.get();
           payload.data.instance = instance.data();
           payload.data.id = instance.id;
+          if (data.configuration && data.configuration.mode) {
+            payload.data.mode = data.configuration.mode;
+          }
+          if (data.configuration && data.configuration.operators) {
+            payload.data.operators = data.configuration.operators;
+          }
         } else {
           throw new Error('instance is required');
         }
