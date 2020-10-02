@@ -24,8 +24,9 @@ import UserVideo from './components/UserVideo';
 
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
-const OPENVIDU_SERVER_URL = "https://dev.collab.extream.app";
+// const OPENVIDU_SERVER_URL = "https://dev.collab.extream.app";
 // const OPENVIDU_SERVER_URL = "http://localhost:5442";
+const OPENVIDU_SERVER_URL = "https://collab.extream.app";
 
 export default {
 	name: 'App',
