@@ -173,12 +173,11 @@ exports.manage = async (event, context, callback) => {
         let data = session.data();
         const instancesRef = docRef.collection('instances');
         const instances = await instancesRef.get();
-        // if an instance already exists, and this is a group mode throw an error
-        // disabling for now, can't remember why its needed!
-        // if (instances.size > 0 && data.configuration.mode && data.configuration.mode === 'group') {
-        //   payload.instance = instances.docs[0].id;
-        //   throw new Error('instance_exists');
-        // }
+        // if an instance already exists, and this is a group mode, use it as the instance id
+        if (instances.size > 0 && data.configuration.mode && data.configuration.mode === 'group') {
+          payload.data.instance = instances.docs[0].id;
+          // throw new Error('instance_exists');
+        }
 
         const instanceRef = docRef.collection('instances').doc(payload.data.instance);
 
