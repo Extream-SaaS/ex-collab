@@ -174,10 +174,11 @@ exports.manage = async (event, context, callback) => {
         const instancesRef = docRef.collection('instances');
         const instances = await instancesRef.get();
         // if an instance already exists, and this is a group mode throw an error
-        if (instances.size > 0 && data.configuration.mode && data.configuration.mode === 'group') {
-          payload.instance = instances.docs[0].id;
-          throw new Error('instance_exists');
-        }
+        // disabling for now, can't remember why its needed!
+        // if (instances.size > 0 && data.configuration.mode && data.configuration.mode === 'group') {
+        //   payload.instance = instances.docs[0].id;
+        //   throw new Error('instance_exists');
+        // }
 
         const instanceRef = docRef.collection('instances').doc(payload.data.instance);
 
@@ -383,7 +384,7 @@ exports.manage = async (event, context, callback) => {
 
           await instanceRef.set({
             status: 'complete',
-            participants: [],
+            // participants: [],
             updatedBy: user.id,
             updatedAt: Firestore.FieldValue.serverTimestamp(),
           }, { merge: true });
