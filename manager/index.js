@@ -406,5 +406,18 @@ exports.manage = async (event, context, callback) => {
         callback(0);
       }
       break;
+    case 'sign':
+      if (action === 'zoom') {
+        const apiKey = 'iy8bpRGDEjKzDXYt5sx3KxGBtALmxiSdk7yY';
+        const apiSecret = 'Vdzh9PEWAszheUQvlaIi2K1g9eXhKwsdJgKj';
+        // Prevent time sync issue between client signature generation and zoom 
+        const timestamp = new Date().getTime() - 30000;
+        const msg = Buffer.from(apiKey + payload.meetingNumber + timestamp + payload.role).toString('base64');
+        const hash = crypto.createHmac('sha256', apiSecret).update(msg).digest('base64');
+        const signature = Buffer.from(`${apiKey}.${payload.meetingNumber}.${timestamp}.${payload.role}.${hash}`).toString('base64');
+
+        await publish('ex-gateway', source, { domain, action, command, payload: { signature }, user, socketId });
+      }
+      break;
   }
 };
