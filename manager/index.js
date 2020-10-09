@@ -215,6 +215,42 @@ exports.manage = async (event, context, callback) => {
         callback(0);
       }
       break;
+    case 'assign':
+      try {
+        if (domain !== 'client') {
+          callback(0);
+          return;
+        }
+        if (!payload.id) {
+          throw new Error('item id is required');
+        }
+        console.log('payload', payload);
+        const docRef = db.collection('sessions').doc(payload.id);
+        const session = await docRef.get();
+
+        if (!session.exists) {
+          throw new Error('item not found');
+        }
+
+        let data = session.data();
+        if (data.configuration.mode === 'round-robin') {
+          await docRef.set({
+            configuration: {
+              operators: admin.firestore.FieldValue.arrayUnion(payload.data.user),
+            },
+            updatedBy: user.id,
+            updatedAt: Firestore.FieldValue.serverTimestamp(),
+          }, { merge: true });
+        } else {
+          throw new Error('item not round-robin');
+        }
+        await publish('ex-gateway', source, { domain, action, command, payload, user, socketId });
+        callback();
+      } catch (error) {
+        await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
+        callback(0);
+      }
+      break;
     case 'activate':
       // client activates and sets status to active
       try {
@@ -420,4 +456,5 @@ exports.manage = async (event, context, callback) => {
       }
       break;
   }
+  return;
 };
