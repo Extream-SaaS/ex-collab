@@ -186,6 +186,7 @@ exports.manage = async (event, context, callback) => {
         if (data.configuration.mode === 'round-robin') {
           payload.data.operators = data.configuration.operators;
           await instanceRef.set({
+            ...payload,
             participants: [user],
             status: 'pending',
             addedBy: user.id,
@@ -193,6 +194,7 @@ exports.manage = async (event, context, callback) => {
           });
         } else if (data.configuration.mode === 'instant' && payload.data.participants) {
           await instanceRef.set({
+            ...payload,
             participants: payload.data.participants,
             status: 'pending',
             addedBy: user.id,
