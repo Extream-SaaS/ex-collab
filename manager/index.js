@@ -240,7 +240,11 @@ exports.manage = async (event, context, callback) => {
             instances.forEach(async instance => {
               data.instances[instance.id] = instance.data();
             });
-            payload.instances = data.instances;
+            payload.data = {
+              mode: data.configuration.mode,
+              operators: data.configuration.operators,
+              instances: data.instances,
+            };
           } else if (domain === 'consumer') {
             const instanceRef = docRef.collection('instances').doc(payload.data.id);
             const instance = await instanceRef.get();
