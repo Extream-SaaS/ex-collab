@@ -262,6 +262,7 @@ exports.manage = async (event, context, callback) => {
               mode: data.configuration.mode,
               operators: data.configuration.operators,
               requester: user,
+              instances: {},
             };
             payload.data.instances[instance.id] = instance.data();
           }
