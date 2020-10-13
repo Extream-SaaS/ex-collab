@@ -241,7 +241,7 @@ exports.manage = async (event, context, callback) => {
         payload.data.mode = data.configuration.mode;
 
         if (data.configuration.mode === 'round-robin') {
-          payload.data.participants = data.configuration.operators;
+          payload.data.participants = data.configuration.participants;
           await instanceRef.set({
             participants: admin.firestore.FieldValue.arrayUnion(user),
             status: 'pending',
