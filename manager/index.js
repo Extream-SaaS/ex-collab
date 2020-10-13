@@ -217,6 +217,43 @@ exports.manage = async (event, context, callback) => {
         callback(0);
       }
       break;
+    case 'recall':
+      try {
+        console.log('payload', payload);
+        const docRef = db.collection('sessions').doc(payload.id);
+        const session = await docRef.get();
+
+        if (!session.exists) {
+          throw new Error('item not found');
+        }
+
+        let data = session.data();
+        const instancesRef = docRef.collection('instances');
+        const instances = await instancesRef.get();
+        // if an instance already exists, and this is a group mode, use it as the instance id
+        if (instances.size > 0 && data.configuration.mode && data.configuration.mode === 'group') {
+          payload.data.instance = instances.docs[0].id;
+          // throw new Error('instance_exists');
+        }
+
+        const instanceRef = docRef.collection('instances').doc(payload.data.id);
+
+        payload.data.mode = data.configuration.mode;
+
+        if (data.configuration.mode === 'round-robin') {
+          payload.data.participants = data.configuration.operators;
+          await instanceRef.set({
+            participants: admin.firestore.FieldValue.arrayUnion(user),
+            status: 'pending',
+          });
+        }
+        await publish('ex-gateway', source, { domain, action, command, payload: { ...payload }, user, socketId });
+        callback();
+      } catch (error) {
+        await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
+        callback(0);
+      }
+      break;
     case 'callback':
       try {
         if (!payload.id) {
