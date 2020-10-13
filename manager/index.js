@@ -261,9 +261,9 @@ exports.manage = async (event, context, callback) => {
             payload.data = {
               mode: data.configuration.mode,
               operators: data.configuration.operators,
-              instances: [instance.data],
               requester: user,
             };
+            payload.data.instances[instance.id] = instance.data();
           }
         } else {
           throw new Error('item not round-robin');
