@@ -244,6 +244,7 @@ exports.manage = async (event, context, callback) => {
               mode: data.configuration.mode,
               operators: data.configuration.operators,
               instances: data.instances,
+              requester: user,
             };
           } else if (domain === 'consumer') {
             const instanceRef = docRef.collection('instances').doc(payload.data.id);
