@@ -217,6 +217,51 @@ exports.manage = async (event, context, callback) => {
         callback(0);
       }
       break;
+    case 'callback':
+      try {
+        if (!payload.id) {
+          throw new Error('item id is required');
+        }
+        console.log('payload', payload);
+        const docRef = db.collection('sessions').doc(payload.id);
+        const session = await docRef.get();
+
+        if (!session.exists) {
+          throw new Error('item not found');
+        }
+        let data = session.data();
+        if (data.configuration.mode === 'round-robin') {
+          if (domain === 'client') {
+            // get all the webrtc instances in the item with status of callback
+            // we need to get all the instances with a status of callback if we are an operator we can get all attendees
+            const instancesRef = docRef.collection('instances');
+            const instances = await instancesRef.where('status', '==', 'callback').get();
+            data.instances = {};
+            instances.forEach(async instance => {
+              data.instances[instance.id] = instance.data();
+            });
+          } else if (domain === 'consumer') {
+            const instanceRef = docRef.collection('instances').doc(payload.data.id);
+            const instance = await instanceRef.get();
+            if (!instance.exists) {
+              throw new Error('instance not found');
+            }
+            instance.set({
+              status: payload.data.status,
+              updatedBy: user.id,
+              updatedAt: Firestore.FieldValue.serverTimestamp(),
+            }, { merge: true });
+          }
+        } else {
+          throw new Error('item not round-robin');
+        }
+        await publish('ex-gateway', source, { domain, action, command, payload, user, socketId });
+        callback();
+      } catch (error) {
+        await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
+        callback(0);
+      }
+      break;
     case 'assign':
       try {
         if (domain !== 'client') {
