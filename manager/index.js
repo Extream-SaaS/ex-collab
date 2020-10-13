@@ -240,13 +240,14 @@ exports.manage = async (event, context, callback) => {
             instances.forEach(async instance => {
               data.instances[instance.id] = instance.data();
             });
+            payload.data = data;
           } else if (domain === 'consumer') {
             const instanceRef = docRef.collection('instances').doc(payload.data.id);
             const instance = await instanceRef.get();
             if (!instance.exists) {
               throw new Error('instance not found');
             }
-            instance.set({
+            instanceRef.set({
               status: payload.data.status,
               updatedBy: user.id,
               updatedAt: Firestore.FieldValue.serverTimestamp(),
