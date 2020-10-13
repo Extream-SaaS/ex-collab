@@ -244,7 +244,7 @@ exports.manage = async (event, context, callback) => {
               mode: data.configuration.mode,
               operators: data.configuration.operators,
               instances: data.instances,
-              requester: user,
+              requester: data.requester,
             };
           } else if (domain === 'consumer') {
             const instanceRef = docRef.collection('instances').doc(payload.data.id);
@@ -254,9 +254,16 @@ exports.manage = async (event, context, callback) => {
             }
             instanceRef.set({
               status: payload.data.status,
+              requester: user,
               updatedBy: user.id,
               updatedAt: Firestore.FieldValue.serverTimestamp(),
             }, { merge: true });
+            payload.data = {
+              mode: data.configuration.mode,
+              operators: data.configuration.operators,
+              instances: [instance.data],
+              requester: user,
+            };
           }
         } else {
           throw new Error('item not round-robin');
