@@ -234,6 +234,7 @@ exports.manage = async (event, context, callback) => {
         const instanceData = instance.data();
 
         payload.data.mode = data.configuration.mode;
+        payload.operators = data.configuration.operators;
 
         if (data.configuration.mode === 'round-robin') {
           payload.data.participants = instanceData.participants;
