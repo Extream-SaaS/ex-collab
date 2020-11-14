@@ -1,8 +1,10 @@
 <template>
-<div v-if="streamManager">
-	<ov-video :stream-manager="streamManager"/>
-	<div><p>{{ clientData }}</p></div>
-</div>
+	<div v-if="streamManager">
+		<ov-video :stream-manager="streamManager" :class="{
+			active: active
+		}"  />
+		<div class="name"><p>{{ clientData }}</p></div>
+	</div>
 </template>
 
 <script>
@@ -17,6 +19,11 @@ export default {
 
 	props: {
 		streamManager: Object,
+		active: {
+			type: Boolean,
+			default: false,
+			required: false,
+		},
 	},
 
 	computed: {
@@ -36,3 +43,11 @@ export default {
 	},
 };
 </script>
+<style scoped>
+.name {
+	color: #6fedc3;
+}
+.active {
+	border: 1px solid #6fedc3;
+}
+</style>

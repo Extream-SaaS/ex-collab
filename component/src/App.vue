@@ -6,11 +6,11 @@
 				<input type="button" id="buttonLeaveSession" @click="leaveSession" value="Leave session">
 			</div>
 			<div id="main-video">
-				<user-video :stream-manager="mainStreamManager"/>
+				<user-video :stream-manager="mainStreamManager" :active="true" />
 			</div>
 			<div id="video-container">
-				<user-video :stream-manager="publisher" @click.native="updateMainVideoStreamManager(publisher)"/>
-				<user-video v-for="(sub, index) in subscribers" :key="index" :stream-manager="sub" @click.native="updateMainVideoStreamManager(sub)"/>
+				<user-video :stream-manager="publisher" class="video" />
+				<user-video v-for="(sub, index) in subscribers" :key="index" :stream-manager="sub" @click.native="updateMainVideoStreamManager(sub)" class="video" />
 			</div>
 		</div>
 	</div>
@@ -70,13 +70,25 @@ export default {
 				const subscriber = this.session.subscribe(stream);
 				this.subscribers.push(subscriber);
 			});
-			// On every Stream destroyed...
-			this.session.on('streamDestroyed', ({ stream }) => {
-				const index = this.subscribers.indexOf(stream.streamManager, 0);
-				if (index >= 0) {
-					this.subscribers.splice(index, 1);
-				}
-			});
+			this.session.on('publisherStartSpeaking', ({ streamId }) => {
+        if (this.subscribers[streamId]) {
+          this.updateMainVideoStreamManager(this.subscribers[streamId])
+        } else {
+          this.updateMainVideoStreamManager(this.publisher)
+        }
+      })
+      // this.session.on('publisherStopSpeaking', (stream) => {
+      //   // blah
+      // })
+      // On every Stream destroyed...
+      this.session.on('streamDestroyed', ({ stream }) => {
+        if (this.subscribers[stream.streamId]) {
+          this.$delete(this.subscribers, stream.streamId)
+          if (this.mainStreamManager === stream) {
+            this.mainStreamManager = this.prevStreamManager
+          }
+        }
+      })
 			// --- Connect to the session with a valid user token ---
 			// 'getToken' method is simulating what your server-side should do.
 			// 'token' parameter should be retrieved and returned by your own backend
@@ -141,3 +153,37 @@ export default {
 	}
 }
 </script>
+<style scoped>
+#session-title {
+	width: 50vw;
+	font-size: 16px;
+	color: #6fedc3;
+	border: 1px solid #d1e8e2;
+	display: inline-block;
+	padding: 15px;
+}
+#buttonLeaveSession {
+	background-color: #116466; /* Green */
+  border: none;
+  color: #6fedc3;
+  padding: 16px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+	font-size: 16px;
+	cursor: pointer;
+}
+#buttonLeaveSession:hover {
+	background: #d9b08c;
+	color: #116466;
+}
+#video-container {
+	display: flex;
+}
+.video {
+	width: 30vw;
+	overflow: hidden;
+	margin-right: 12px;
+	flex-basis: auto;
+}
+</style>
