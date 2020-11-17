@@ -10,7 +10,7 @@
           alt="Extream"
           class="shrink mr-2"
           contain
-          src="https://storage.googleapis.com/ex-assets/collab/ex-icon-1.jpg"
+          src="https://storage.googleapis.com/ex-assets/collab/ex-white.svg"
           transition="scale-transition"
           width="40"
         />
@@ -18,7 +18,7 @@
 
       <v-spacer></v-spacer>
 			<v-menu offset-y>
-				<template v-slot:activator="{ on, attrs }">
+				<template v-if="loggedIn" v-slot:activator="{ on, attrs }">
 					<v-btn
             icon
             x-large
@@ -49,25 +49,60 @@
     <v-main>
       <router-view></router-view>
     </v-main>
+    <v-dialog :value="!loggedIn" :width="width">
+      <v-login @login="login" />
+    </v-dialog>
   </v-app>
 </template>
 
 <script>
-
+import VLogin from './components/Login'
 export default {
   name: 'App',
-
+  components: {
+    VLogin,
+  },
   data: () => ({
     items: [
 			{ title: 'Logout' },
 		],
-		loggedIn: false,
 	}),
-	beforeMount() {
-		if (!this.loggedIn) {
-			console.log('log in')
-			this.$router.push({ name: 'Login' })
-		}
-	},
+  computed: {
+    loggedIn() {
+      return localStorage.getItem('isAuthenticated')
+    },
+    width () {
+      switch (this.$vuetify.breakpoint.name) {
+        case 'xs': return 220
+        case 'sm': return 400
+        case 'md': return 500
+        case 'lg': return 600
+      }
+      return 800
+    },
+  },
+  methods: {
+    async login (user) {
+        const { password, username } = await this.$extream.user.fetchUser(user.username)
+        const {
+          id,
+          accessToken,
+          accessTokenExpiresAt,
+          refreshToken,
+          refreshTokenExpiresAt
+        } = await this.$extream.user.login(username, password, '08c3d14e-2cfe-4262-a536-f64c25310d52')
+        this.token = accessToken
+        await this.$extream.connect(accessToken)
+        localStorage.setItem('isAuthenticated', true)
+        localStorage.setItem('session', {
+          id,
+          accessToken,
+          accessTokenExpiresAt,
+          refreshToken,
+          refreshTokenExpiresAt,
+        })
+        this.connected = true
+      },
+  }
 };
 </script>

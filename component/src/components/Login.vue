@@ -12,56 +12,15 @@
         <form @submit.prevent="submit">
           <validation-provider
             v-slot="{ errors }"
-            name="Name"
-            rules="required|max:10"
-          >
-            <v-text-field
-              v-model="name"
-              :counter="10"
-              :error-messages="errors"
-              label="Name"
-              required
-            ></v-text-field>
-          </validation-provider>
-          <validation-provider
-            v-slot="{ errors }"
-            name="email"
+            name="Email"
             rules="required|email"
           >
             <v-text-field
               v-model="email"
               :error-messages="errors"
-              label="E-mail"
+              label="Email"
               required
             ></v-text-field>
-          </validation-provider>
-          <validation-provider
-            v-slot="{ errors }"
-            name="select"
-            rules="required"
-          >
-            <v-select
-              v-model="select"
-              :items="items"
-              :error-messages="errors"
-              label="Select"
-              data-vv-name="select"
-              required
-            ></v-select>
-          </validation-provider>
-          <validation-provider
-            v-slot="{ errors }"
-            rules="required"
-            name="checkbox"
-          >
-            <v-checkbox
-              v-model="checkbox"
-              :error-messages="errors"
-              value="1"
-              label="Option"
-              type="checkbox"
-              required
-            ></v-checkbox>
           </validation-provider>
 
           <v-btn
@@ -69,10 +28,7 @@
             type="submit"
             :disabled="invalid"
           >
-            submit
-          </v-btn>
-          <v-btn @click="clear">
-            clear
+            sign-in
           </v-btn>
         </form>
       </validation-observer>
@@ -101,33 +57,21 @@
   })
 
   export default {
+    name: 'VLogin',
     components: {
       ValidationProvider,
       ValidationObserver,
     },
     data: () => ({
-      name: '',
       email: '',
-      select: null,
-      items: [
-        'Item 1',
-        'Item 2',
-        'Item 3',
-        'Item 4',
-      ],
-      checkbox: null,
     }),
 
     methods: {
       submit () {
         this.$refs.observer.validate()
-      },
-      clear () {
-        this.name = ''
-        this.email = ''
-        this.select = null
-        this.checkbox = null
-        this.$refs.observer.reset()
+        this.$emit('login', {
+          username: this.email
+        })
       },
     },
   }

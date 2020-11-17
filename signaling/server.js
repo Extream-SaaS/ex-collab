@@ -93,6 +93,10 @@ app.post('/sessions/token', async function (req, res) {
                 // Session already exists
                 console.log('Existing session', sessionName);
 
+                while (mapSessions[sessionName].creating) {
+                    // lockup because this session is creating
+                }
+
                 // Get the existing Session from the collection
                 const session = mapSessions[sessionName];
 
@@ -189,6 +193,9 @@ async function isLogged(authorization) {
 }
 
 const createSession = (res, sessionName, tokenOptions) => {
+    mapSessions[sessionName] = {
+        creating: true,
+    };
     OV.createSession()
         .then(session => {
             // Store the new Session in the collection of Sessions

@@ -1,0 +1,48 @@
+name: ex-collab component
+
+on:
+  push:
+    paths:
+    - 'component/**'
+    branches: [ master ]
+
+jobs:
+  buildComponent:
+    name: Build and deploy documentation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: component
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        id: Build
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Vue App Install
+        id: Vue-App-Install
+        run: yarn install --frozen-lockfile
+      - name: Vue App Build
+        id: Vue-App-Build
+        run: yarn build
+      - name: Deploy to GCP
+        id: Deploy
+        uses: actions-hub/gcloud@318.0.0
+        env:
+          PROJECT_ID: ${{secrets.GCLOUD_PROJECT_ID}}
+          APPLICATION_CREDENTIALS: ${{secrets.GCLOUD_CREDENTIALS}}
+        with:
+          args: app deploy component/app.yaml
+
+      - uses: act10ns/slack@v1
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+        if: always()
