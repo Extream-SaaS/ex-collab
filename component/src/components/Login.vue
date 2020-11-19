@@ -1,15 +1,11 @@
 <template>
-  <v-card
-    class="mx-auto my-12"
-    max-width="374"
-  >
+  <v-card>
     <v-card-title>Login</v-card-title>
     <v-card-text>
       <validation-observer
         ref="observer"
-        v-slot="{ invalid }"
       >
-        <form @submit.prevent="submit">
+        <v-form v-model="valid" @submit.prevent="submit">
           <validation-provider
             v-slot="{ errors }"
             name="Email"
@@ -26,11 +22,12 @@
           <v-btn
             class="mr-4"
             type="submit"
-            :disabled="invalid"
+            :disabled="!valid || loading"
+            :loading="loading"
           >
             sign-in
           </v-btn>
-        </form>
+        </v-form>
       </validation-observer>
     </v-card-text>
   </v-card>
@@ -62,7 +59,15 @@
       ValidationProvider,
       ValidationObserver,
     },
+    props: {
+      loading: {
+        type: Boolean,
+        required: false,
+        default: false,
+      },
+    },
     data: () => ({
+      valid: true,
       email: '',
     }),
 

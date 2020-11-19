@@ -49,31 +49,80 @@
     <v-main>
       <router-view></router-view>
     </v-main>
-    <v-dialog :value="!loggedIn" :width="width">
-      <v-login @login="login" />
+    <v-dialog :value="!loggedIn && !roomId && !joined" persistent :width="width">
+      <v-login @login="login" :loading="loggingIn" />
+    </v-dialog>
+    <v-dialog :value="loggedIn && !roomId && !joined" persistent :width="width">
+      <v-join
+        @choice="choice"
+        @create="create"
+        @join="join"
+        @register="register"
+        :view="joinView"
+        :roomAction="joinAction"
+        :loading="joinLoading"
+      />
+    </v-dialog>
+    <v-dialog :value="!loggedIn && roomId && !joined" persistent :width="width">
+      <v-join
+        @choice="choice"
+        @join="join"
+        @register="register"
+        :room-id="roomId"
+        :view="joinView"
+        :roomAction="joinAction"
+        :loading="joinLoading"
+      />
     </v-dialog>
   </v-app>
 </template>
 
 <script>
 import VLogin from './components/Login'
+import VJoin from './components/Join'
 export default {
   name: 'App',
   components: {
     VLogin,
+    VJoin,
   },
   data: () => ({
+    joined: false,
+    joinView: 'choice',
+    loggingIn: false,
     items: [
 			{ title: 'Logout' },
-		],
-	}),
+    ],
+    loggedIn: localStorage.getItem('isAuthenticated'),
+    roomId: null,
+    joinLoading: false,
+    joinAction: '',
+    eventId: '08c3d14e-2cfe-4262-a536-f64c25310d52',
+    itemId: 'fF9KUD0z1Ic5zGeEZd8O',
+  }),
+  async beforeMount() {
+    console.log('before mount', this.$route.params);
+    this.roomId = this.$route.params.room
+    this.joinView = this.roomId ? 'register' : 'choice'
+    this.joinAction = this.roomId ? 'Your details' : ''
+    if (this.loggedIn) {
+      // need to reauth the user
+      const { accessToken } = JSON.parse(localStorage.getItem('session'))
+      try {
+        const user = await this.$extream.connect(accessToken)
+        localStorage.setItem('user', JSON.stringify(user))
+      } catch (error) {
+        this.loggedIn = false
+        localStorage.setItem('isAuthenticated', false)
+        localStorage.setItem('session', JSON.stringify({}))
+        localStorage.setItem('user', null)
+      }
+    }
+  },
   computed: {
-    loggedIn() {
-      return localStorage.getItem('isAuthenticated')
-    },
     width () {
       switch (this.$vuetify.breakpoint.name) {
-        case 'xs': return 220
+        case 'xs': return 400
         case 'sm': return 400
         case 'md': return 500
         case 'lg': return 600
@@ -83,6 +132,8 @@ export default {
   },
   methods: {
     async login (user) {
+      this.loggingin = true
+      try {
         const { password, username } = await this.$extream.user.fetchUser(user.username)
         const {
           id,
@@ -90,19 +141,68 @@ export default {
           accessTokenExpiresAt,
           refreshToken,
           refreshTokenExpiresAt
-        } = await this.$extream.user.login(username, password, '08c3d14e-2cfe-4262-a536-f64c25310d52')
+        } = await this.$extream.user.login(username, password, this.eventId)
         this.token = accessToken
-        await this.$extream.connect(accessToken)
+        const authUser = await this.$extream.connect(accessToken)
         localStorage.setItem('isAuthenticated', true)
-        localStorage.setItem('session', {
+        localStorage.setItem('session', JSON.stringify({
           id,
           accessToken,
           accessTokenExpiresAt,
           refreshToken,
           refreshTokenExpiresAt,
-        })
+        }))
+        localStorage.setItem('user', JSON.stringify(authUser))
+        this.loggingIn = false
         this.connected = true
-      },
+        this.loggedIn = true
+      } catch (error) {
+        this.loggingIn = false
+      }
+    },
+    async create(fields) {
+      this.joinLoading = true
+      console.log('create', fields)
+      this.$extream.socket.off('client_webrtc_start')
+      this.$extream.on(`client_webrtc_start`, (resp) => {
+        if (resp.payload && !resp.error) {
+          this.$emit('open-video', resp.payload.data.instance)
+        }
+      })
+      this.$extream.emit(`client_webrtc_start`, {
+        id: this.itemId,
+        data: {
+          title: fields.title,
+          register: true,
+          generator: 'memorable',
+          emails: fields.emails,
+          baseURL: window.location.origin,
+        },
+      })
+      this.joinLoading = false
+      this.joined = true
+    },
+    async join(fields) {
+      this.joinLoading = true
+      console.log('join', fields)
+
+      this.joinLoading = false
+      this.joined = true
+    },
+    async register(fields) {
+      this.joinLoading = true
+      console.log('register attendee', fields)
+      this.joinLoading = false
+    },
+    choice(choice) {
+      if (choice === 'join') {
+        this.joinAction = 'Join meeting'
+      } else if (choice === 'create') {
+        this.joinAction = 'Create meeting'
+      } else {
+        this.joinAction = ''
+      }
+    }
   }
 };
 </script>

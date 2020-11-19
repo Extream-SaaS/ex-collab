@@ -1,80 +1,168 @@
 <template>
-  <v-card
-    class="mx-auto my-12"
-    max-width="374"
-  >
-    <v-card-title>Join room</v-card-title>
+  <v-card>
+    <v-card-title>{{ roomAction }}</v-card-title>
     <v-card-text>
-      <validation-observer
-        ref="observer"
+      <v-container v-if="showChoice" fluid>
+        <v-row dense>
+          <v-col>
+            <v-card>
+              <v-card-title>Join an existing meeting</v-card-title>
+              <v-card-text>
+                <v-btn @click="existingMeeting" text>Enter your meeting pin</v-btn>
+              </v-card-text>
+            </v-card>
+          </v-col>
+          <v-col>
+            <v-card>
+              <v-card-title>Create a new meeting</v-card-title>
+              <v-card-text>
+                <v-btn @click="newMeeting" text>Enter meeting details</v-btn>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+      <validation-observer v-else-if="createMeeting"
+        ref="create"
         v-slot="{ invalid }"
+        :key="'create'"
       >
-        <form @submit.prevent="submit">
+        <v-form @submit.prevent="createSubmit">
           <validation-provider
             v-slot="{ errors }"
-            name="Room pin"
+            name="Title"
             rules="required"
+            :key="'title'"
           >
             <v-text-field
-              v-model="name"
-              :counter="10"
+              v-model="create.title"
               :error-messages="errors"
-              label="Name"
+              label="Title"
               required
             ></v-text-field>
           </validation-provider>
           <validation-provider
             v-slot="{ errors }"
-            name="email"
+            name="Participants"
             rules="required|email"
+            :key="'participants'"
           >
-            <v-text-field
-              v-model="email"
+            <v-combobox
+              v-model="create.emails"
               :error-messages="errors"
-              label="E-mail"
-              required
-            ></v-text-field>
+              :items="addressBook"
+              append-icon=""
+              label="Participants"
+              multiple
+              chips
+              deletable-chips
+              :delimiters="[',', ';', ' ']"
+              type="email"
+            ></v-combobox>
           </validation-provider>
-          <validation-provider
-            v-slot="{ errors }"
-            name="select"
-            rules="required"
-          >
-            <v-select
-              v-model="select"
-              :items="items"
-              :error-messages="errors"
-              label="Select"
-              data-vv-name="select"
-              required
-            ></v-select>
-          </validation-provider>
-          <validation-provider
-            v-slot="{ errors }"
-            rules="required"
-            name="checkbox"
-          >
-            <v-checkbox
-              v-model="checkbox"
-              :error-messages="errors"
-              value="1"
-              label="Option"
-              type="checkbox"
-              required
-            ></v-checkbox>
-          </validation-provider>
-
           <v-btn
             class="mr-4"
             type="submit"
-            :disabled="invalid"
+            :disabled="invalid || loading"
+            :loading="loading"
+          >
+            create
+          </v-btn>
+          <v-btn @click="back">
+            back
+          </v-btn>
+        </v-form>
+      </validation-observer>
+      <validation-observer v-else-if="joinMeeting"
+        ref="join"
+        v-slot="{ invalid }"
+        :key="'join'"
+      >
+        <v-form @submit.prevent="joinSubmit">
+          <validation-provider
+            v-slot="{ errors }"
+            name="Meeting Pin"
+            rules="required"
+            :key="'meetingPin'"
+          >
+            <v-text-field
+              v-model="join.pin"
+              :counter="6"
+              :error-messages="errors"
+              label="Meeting Pin"
+              required
+            ></v-text-field>
+          </validation-provider>
+          <v-btn
+            class="mr-4"
+            type="submit"
+            :disabled="invalid || loading"
+            :loading="loading"
           >
             submit
           </v-btn>
-          <v-btn @click="clear">
-            clear
+          <v-btn @click="back">
+            back
           </v-btn>
-        </form>
+        </v-form>
+      </validation-observer>
+      <validation-observer v-else-if="userForm"
+        ref="user"
+        v-slot="{ invalid }"
+        :key="'user'"
+      >
+        <v-form @submit.prevent="userSubmit">
+          <validation-provider
+            v-slot="{ errors }"
+            name="First name"
+            rules="required"
+            :key="'firstName'"
+          >
+            <v-text-field
+              v-model="attendee.firstName"
+              :error-messages="errors"
+              label="First name"
+              required
+            ></v-text-field>
+          </validation-provider>
+          <validation-provider
+            v-slot="{ errors }"
+            name="Last name"
+            rules="required"
+            :key="'lastName'"
+          >
+            <v-text-field
+              v-model="attendee.lastName"
+              :error-messages="errors"
+              label="Last name"
+              required
+            ></v-text-field>
+          </validation-provider>
+          <validation-provider
+            v-slot="{ errors }"
+            name="Email"
+            rules="required|email"
+            :key="'email'"
+          >
+            <v-text-field
+              v-model="attendee.email"
+              :error-messages="errors"
+              label="Email"
+              required
+            ></v-text-field>
+          </validation-provider>
+          <v-btn
+            class="mr-4"
+            type="submit"
+            :disabled="invalid || loading"
+            :loading="loading"
+          >
+            submit
+          </v-btn>
+          <v-btn @click="back">
+            back
+          </v-btn>
+        </v-form>
       </validation-observer>
     </v-card-text>
   </v-card>
@@ -105,29 +193,98 @@
       ValidationProvider,
       ValidationObserver,
     },
-    data: () => ({
-      name: '',
-      email: '',
-      select: null,
-      items: [
-        'Item 1',
-        'Item 2',
-        'Item 3',
-        'Item 4',
-      ],
-      checkbox: null,
-    }),
-
-    methods: {
-      submit () {
-        this.$refs.observer.validate()
+    props: {
+      view: {
+        type: String,
+        required: false,
+        default: 'choice',
       },
-      clear () {
-        this.name = ''
-        this.email = ''
-        this.select = null
-        this.checkbox = null
-        this.$refs.observer.reset()
+      loading: {
+        type: Boolean,
+        required: false,
+        default: false,
+      },
+      roomId: {
+        type: String,
+        required: false,
+        default: '',
+      },
+      roomAction: {
+        type: String,
+        required: false,
+        default: '',
+      },
+    },
+    data: () => ({
+      showChoice: true,
+      createMeeting: false,
+      joinMeeting: false,
+      userForm: false,
+      addressBook: [],
+      create: {
+        title: '',
+        emails: [],
+      },
+      join: {
+        pin: '',
+      },
+      meeting: {
+        pin: '',
+      },
+      attendee: {
+        firstName: '',
+        lastName: '',
+        email: '',
+      },
+    }),
+    mounted() {
+      this.showChoice = this.view === 'choice'
+      this.userForm = this.view === 'register'
+    },
+    methods: {
+      joinSubmit() {
+        this.submit('join')
+        this.$emit('join', this.join)
+      },
+      createSubmit() {
+        this.submit('create')
+        this.$emit('create', this.create)
+      },
+      userSubmit() {
+        this.submit('register')
+        this.$emit('register', {
+          attendee: this.attendee,
+          roomId: this.roomId,
+        })
+      },
+      submit (form) {
+        console.log('submit', form)
+        this.$refs[form].validate()
+        this.showChoice = false
+        this.joinMeeting = false
+        this.createMeeting = false
+      },
+      back() {
+        this.$emit('choice', '')
+        this.create.title = ''
+        this.create.emails = []
+        this.join.pin = ''
+        this.showChoice = true
+        this.userForm = false
+        this.joinMeeting = false
+        this.createMeeting = false
+      },
+      existingMeeting() {
+        this.$emit('choice', 'join')
+        this.showChoice = false
+        this.joinMeeting = true
+        this.createMeeting = false
+      },
+      newMeeting() {
+        this.$emit('choice', 'create')
+        this.showChoice = false
+        this.joinMeeting = false
+        this.createMeeting = true
       },
     },
   }
