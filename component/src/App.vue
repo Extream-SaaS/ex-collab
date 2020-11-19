@@ -52,7 +52,7 @@
     <v-dialog :value="!loggedIn && !roomId && !joined" persistent :width="width">
       <v-login @login="login" :loading="loggingIn" />
     </v-dialog>
-    <v-dialog :value="loggedIn && !roomId && !joined" persistent :width="width">
+    <v-dialog :value="loggedIn && !roomId && !joined && !authCheck" persistent :width="width">
       <v-join
         @choice="choice"
         @create="create"
@@ -63,7 +63,7 @@
         :loading="joinLoading"
       />
     </v-dialog>
-    <v-dialog :value="!loggedIn && roomId && !joined" persistent :width="width">
+    <v-dialog :value="!loggedIn && roomId && !joined && !authCheck" persistent :width="width">
       <v-join
         @choice="choice"
         @join="join"
@@ -87,6 +87,7 @@ export default {
     VJoin,
   },
   data: () => ({
+    authCheck: true,
     joined: false,
     joinView: 'choice',
     loggingIn: false,
@@ -101,7 +102,6 @@ export default {
     itemId: 'fF9KUD0z1Ic5zGeEZd8O',
   }),
   async beforeMount() {
-    console.log('before mount', this.$route.params);
     this.roomId = this.$route.params.room
     this.joinView = this.roomId ? 'register' : 'choice'
     this.joinAction = this.roomId ? 'Your details' : ''
@@ -116,6 +116,8 @@ export default {
         localStorage.setItem('isAuthenticated', false)
         localStorage.setItem('session', JSON.stringify({}))
         localStorage.setItem('user', null)
+      } finally {
+        this.authCheck = false
       }
     }
   },
