@@ -24,6 +24,12 @@ jobs:
         uses: actions/setup-node@v2-beta
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Create npmrc
+        id: Create-npmrc
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Vue App Install
         id: Vue-App-Install
         run: yarn install --frozen-lockfile
