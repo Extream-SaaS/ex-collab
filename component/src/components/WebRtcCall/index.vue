@@ -35,7 +35,7 @@
             v-if="subscribers.length == 0 && showCall"
             class="text-sm"
           >
-            {{ $t('$sublime.webRtc.connecting') }}
+            We are connecting your call
           </span>
           <div
             v-if="showCall"
@@ -76,15 +76,15 @@
             class="flex text-center justify-around flex-col h-128"
           >
             <h1>
-              {{ $t('$sublime.webRtc.busy') }}
+              There was no answer
             </h1>
             <div class="flex justify-evenly">
               <base-button
-                :text="$t('$sublime.webRtc.yes')"
+                text="Yes"
                 @click.native="requestCallBack"
               />
               <base-button
-                :text="$t('$sublime.webRtc.no')"
+                text="No"
                 @click.native="$emit('close')"
               />
             </div>
@@ -94,7 +94,7 @@
       <div v-else>
         <base-spinner class="w-16 mx-auto text-blue" />
         <p class="text-sm">
-          {{ $t('$sublime.webRtc.loading') }}
+          Loading
         </p>
       </div>
     </div>
@@ -108,16 +108,14 @@
           class="inline-flex justify-center w-24 px-2 py-2 text-base leading-6 font-medium hover:text-red focus:outline-none transition ease-in-out duration-150 sm:text-2xl sm:leading-5"
           @click="toggleAudio"
         >
-          <font-awesome-icon
+          <v-icon
             v-if="publishAudio"
-            :icon="['fas', 'microphone']"
             size="lg"
-          />
-          <font-awesome-icon
+          >mdi-microphone</v-icon>
+          <v-icon
             v-else
-            :icon="['fas', 'microphone-slash']"
             size="lg"
-          />
+          >mdi-microphone-off</v-icon>
         </button>
       </span>
       <span class="flex w-full rounded-md sm:ml-3 sm:w-auto">
@@ -126,16 +124,14 @@
           class="inline-flex justify-center w-24 px-2 py-2 text-base leading-6 font-medium hover:text-red focus:outline-none transition ease-in-out duration-150 sm:text-2xl sm:leading-5"
           @click="toggleVideo"
         >
-          <font-awesome-icon
+          <v-icon
             v-if="publishVideo"
-            :icon="['fas', 'video']"
             size="lg"
-          />
-          <font-awesome-icon
+          >mdi-video</v-icon>
+          <v-icon
             v-else
-            :icon="['fas', 'video-slash']"
             size="lg"
-          />
+          >mdi-video-off</v-icon>
         </button>
       </span>
       <span class="flex w-full rounded-md sm:ml-3 sm:w-auto">
@@ -144,16 +140,14 @@
           class="inline-flex justify-center w-24 px-2 py-2 text-base leading-6 font-medium hover:text-red focus:outline-none transition ease-in-out duration-150 sm:text-2xl sm:leading-5"
           @click="toggleScreen"
         >
-          <font-awesome-icon
+          <v-icon
             v-if="!publishScreen"
-            :icon="['fas', 'desktop']"
             size="lg"
-          />
-          <font-awesome-icon
+          >mdi-laptop</v-icon>
+          <v-icon
             v-else
-            :icon="['fas', 'stop-circle']"
             size="lg"
-          />
+          >mdi-laptop-off</v-icon>
         </button>
       </span>
     </div>
@@ -164,10 +158,9 @@
           class="inline-flex justify-center rounded-full w-full px-3 py-2 text-base leading-6 font-medium hover:bg-red-lighter focus:outline-none transition ease-in-out duration-150 sm:text-2xl sm:leading-5"
           @click="end"
         >
-          <font-awesome-icon
-            :icon="['fas', 'times']"
+          <v-icon
             size="lg"
-          />
+          >mdi-close-octagon</v-icon>
         </button>
       </span>
     </div>
@@ -179,7 +172,7 @@ import { OpenVidu } from 'openvidu-browser'
 import UserVideo from './sub-components/UserVideo'
 
 export default {
-  name: 'CallModal',
+  name: 'WebRtcCall',
   components: {
     UserVideo
   },
@@ -188,15 +181,7 @@ export default {
       type: String,
       required: true
     },
-    token: {
-      type: String,
-      required: true
-    },
-    name: {
-      type: String,
-      required: true
-    },
-    colabUrl: {
+    collabUrl: {
       type: String,
       required: true
     },
@@ -230,13 +215,15 @@ export default {
       currentSpeaker: undefined,
       currentSharer: undefined,
       user: undefined,
-      showCall: true
+      showCall: true,
+      exSession: JSON.parse(localStorage.getItem('session')),
+      exUser: JSON.parse(localStorage.getItem('user')),
     }
   },
   watch: {
     async itemId (newVal) {
       if (newVal !== 'null') {
-        this.user = await this.verifyUser(this.token)
+        this.user = await this.verifyUser(this.exSession.accessToken)
         this.joinSession()
       }
     }
@@ -244,7 +231,7 @@ export default {
   async beforeMount () {
     console.log('loading before mount', this.loading)
     if (!this.loading) {
-      this.user = await this.verifyUser(this.token)
+      this.user = await this.verifyUser(this.exSession.accessToken)
       this.joinSession()
     }
   },
@@ -374,12 +361,10 @@ export default {
         }
       })
       // --- Connect to the session with a valid user token ---
-      // 'getToken' method is simulating what your server-side should do.
-      // 'token' parameter should be retrieved and returned by your own backend
       this.getToken(this.itemId).then((resp) => {
         const token = resp[0]
         this.session
-          .connect(token, { clientData: this.name })
+          .connect(token, { clientData: this.exUser.firstName })
           .then(() => {
             // --- Get your own camera stream with the desired properties ---
             const publisher = this.OV.initPublisher(undefined, {
@@ -420,7 +405,7 @@ export default {
       this.mainStreamManager = stream
     },
     async verifyUser (token) {
-      const resp = await fetch(`${this.colabUrl}/auth/verify`, {
+      const resp = await fetch(`${this.collabUrl}/auth/verify`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -430,13 +415,13 @@ export default {
     async getToken (sessionName) {
       console.log('session name', sessionName)
       const resp = await fetch(
-        `${this.colabUrl}/sessions/token`,
+        `${this.collabUrl}/sessions/token`,
         {
           method: 'POST',
           body: `sessionName=${sessionName}`,
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            Authorization: `Bearer ${this.token}`
+            Authorization: `Bearer ${this.exSession.accessToken}`
           }
         }
       )

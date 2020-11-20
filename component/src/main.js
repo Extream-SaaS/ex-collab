@@ -29,6 +29,11 @@ Vue.use(SublimePlugin, {
   apiKey: 'MDM2ODI0MzctYmZhMi00NGUxLTg5NzMtYzc1NDU5NTA0OGQ2Ojg5MmIwOTUzMmI5ZjdkNTNiZDY1MmFlNTZkZTdlMzFmMGFhMTQ2OTFkZjgzN2RiOQ=='
 })
 
+Vue.prototype.$extreamData = {
+  eventId: '08c3d14e-2cfe-4262-a536-f64c25310d52',
+  itemId: 'fF9KUD0z1Ic5zGeEZd8O',
+}
+
 new Vue({
   vuetify,
   render: h => h(App),

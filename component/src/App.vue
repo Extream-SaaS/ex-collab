@@ -98,8 +98,6 @@ export default {
     roomId: null,
     joinLoading: false,
     joinAction: '',
-    eventId: '08c3d14e-2cfe-4262-a536-f64c25310d52',
-    itemId: 'fF9KUD0z1Ic5zGeEZd8O',
   }),
   async beforeMount() {
     this.roomId = this.$route.params.room
@@ -119,6 +117,8 @@ export default {
       } finally {
         this.authCheck = false
       }
+    } else {
+      this.authCheck = false
     }
   },
   computed: {
@@ -134,7 +134,7 @@ export default {
   },
   methods: {
     async login (user) {
-      this.loggingin = true
+      this.loggingIn = true
       try {
         const { password, username } = await this.$extream.user.fetchUser(user.username)
         const {
@@ -143,7 +143,7 @@ export default {
           accessTokenExpiresAt,
           refreshToken,
           refreshTokenExpiresAt
-        } = await this.$extream.user.login(username, password, this.eventId)
+        } = await this.$extream.user.login(username, password, this.$extreamData.eventId)
         this.token = accessToken
         const authUser = await this.$extream.connect(accessToken)
         localStorage.setItem('isAuthenticated', true)
@@ -164,15 +164,16 @@ export default {
     },
     async create(fields) {
       this.joinLoading = true
-      console.log('create', fields)
       this.$extream.socket.off('client_webrtc_start')
       this.$extream.on(`client_webrtc_start`, (resp) => {
         if (resp.payload && !resp.error) {
-          this.$emit('open-video', resp.payload.data.instance)
+          this.$router.push(`/${resp.payload.data.instance}`)
+          this.joinLoading = false
+          this.joined = true
         }
       })
       this.$extream.emit(`client_webrtc_start`, {
-        id: this.itemId,
+        id: this.$extreamData.itemId,
         data: {
           title: fields.title,
           register: true,
@@ -181,8 +182,6 @@ export default {
           baseURL: window.location.origin,
         },
       })
-      this.joinLoading = false
-      this.joined = true
     },
     async join(fields) {
       this.joinLoading = true

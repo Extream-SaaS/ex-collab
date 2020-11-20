@@ -2,7 +2,16 @@
   <v-card>
     <v-card-title>{{ roomAction }}</v-card-title>
     <v-card-text>
-      <v-container v-if="showChoice" fluid>
+      <v-container v-if="loading" fluid>
+        <v-row dense>
+          <v-col>
+            <v-progress-circular
+              indeterminate
+            ></v-progress-circular>
+          </v-col>
+        </v-row>
+      </v-container>
+      <v-container v-else-if="showChoice" fluid>
         <v-row dense>
           <v-col>
             <v-card>
