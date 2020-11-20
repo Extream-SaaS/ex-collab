@@ -1,34 +1,25 @@
 <template>
   <div
-    class="bg-white inline-block sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full relative"
     role="dialog"
     aria-modal="true"
   >
-    <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+    <div>
       <div
         v-if="!loading"
-        class="sm:flex sm:items-start"
       >
-        <div
-          class="mt-3 text-center w-full justify-between sm:mt-0 sm:text-left relative"
-        >
+        <div>
           <template v-if="view == 'spotlight' || view == 'thumbnails'">
             <user-video
               v-if="currentSpeaker"
               :stream-manager="subscribers.find(
                 (sub) => sub.stream.streamId === currentSpeaker
               )"
-              fit="object-contain"
-              class="flex-1 h-full border-4"
-              @click.native="updateMainVideoStreamManager(subscribers.find(
-                (sub) => sub.stream.streamId === currentSpeaker
-              ))"
+              fit="object-cover"
             />
             <user-video
               v-else
               :stream-manager="publisher"
-              class="flex-1 h-full border-white border-4"
-              @click.native="updateMainVideoStreamManager(publisher)"
+              fit="object-cover"
             />
           </template>
           <span
@@ -272,6 +263,11 @@ export default {
             }),
             type: 'screen'
           })
+        }).catch((error) => {
+          if (error.name === 'SCREEN_CAPTURE_DENIED') {
+            alert('You must grant permission to share your screen')
+          }
+          this.publishScreen = !this.publishScreen
         })
       } else {
         this.OV.getUserMedia({
@@ -289,6 +285,11 @@ export default {
             }),
             type: 'screen'
           })
+        }).catch((error) => {
+          if (error.name === 'SCREEN_CAPTURE_DENIED') {
+            alert('You must grant permission to share your screen')
+          }
+          this.publishScreen = !this.publishScreen
         })
       }
     },

@@ -934,10 +934,10 @@
   resolved "https://registry.yarnpkg.com/@soda/get-current-script/-/get-current-script-1.0.2.tgz#a53515db25d8038374381b73af20bb4f2e508d87"
   integrity sha512-T7VNNlYVM1SgQ+VsMYhnDkcGmWhQdL0bDyGm5TlQ3GBXnJscEClUUOKduWTmm2zCnvNLC1hc3JpuXjs/nFOc5w==
 
-"@sublime-productions/extream-sdk@^0.5.13":
-  version "0.5.13"
-  resolved "https://registry.yarnpkg.com/@sublime-productions/extream-sdk/-/extream-sdk-0.5.13.tgz#47bf2b8e1b1851f77110ef9bcb4d62c95a2e37ac"
-  integrity sha512-3ylD89t35XjXPsoGHzNYMEfCZLNkiBrxkNPxrH0jK6edggLeE3N5rOWrTlcX1eyhNwhtNB1Zkzeii0pjyS7gzg==
+"@sublime-productions/extream-sdk@^0.5.14":
+  version "0.5.14"
+  resolved "https://registry.yarnpkg.com/@sublime-productions/extream-sdk/-/extream-sdk-0.5.14.tgz#d76a4addf20b39cfedd7a13d91b6a4e8f0166083"
+  integrity sha512-VFTTHdVs/dMipJEZH9gonX9udHvmEhlMcrnjH9X+S36fUi0Atd0XhaNcR92DRMUFOBKx9e3E0lGx55soQEQpzQ==
   dependencies:
     isomorphic-fetch "^2.2.1"
 

@@ -50,29 +50,20 @@
       <router-view></router-view>
     </v-main>
     <v-dialog :value="!loggedIn && !roomId && !joined" persistent :width="width">
-      <v-login @login="login" :loading="loggingIn" />
+      <v-login @login="login" :login-error="loginError" :user-not-found="userNotFound" :loading="loggingIn" />
     </v-dialog>
     <v-dialog :value="loggedIn && !roomId && !joined && !authCheck" persistent :width="width">
       <v-join
         @choice="choice"
         @create="create"
         @join="join"
-        @register="register"
         :view="joinView"
         :roomAction="joinAction"
         :loading="joinLoading"
       />
     </v-dialog>
     <v-dialog :value="!loggedIn && roomId && !joined && !authCheck" persistent :width="width">
-      <v-join
-        @choice="choice"
-        @join="join"
-        @register="register"
-        :room-id="roomId"
-        :view="joinView"
-        :roomAction="joinAction"
-        :loading="joinLoading"
-      />
+      <v-login @login="login" @register="register" :login-error="loginError" :reg-error="regError" :user-invited="userInvited" :invited-id="invitedId" :user-not-found="userNotFound" :register="true" :loading="loggingIn" />
     </v-dialog>
   </v-app>
 </template>
@@ -98,6 +89,11 @@ export default {
     roomId: null,
     joinLoading: false,
     joinAction: '',
+    loginError: '',
+    regError: '',
+    userNotFound: false,
+    userInvited: false,
+    invitedId: '',
   }),
   async beforeMount() {
     this.roomId = this.$route.params.room
@@ -159,6 +155,21 @@ export default {
         this.connected = true
         this.loggedIn = true
       } catch (error) {
+        let errorCaught = false
+        if (error.body) {
+          const resp = await error.json()
+          if (resp.error === 'user is not activated') {
+            // they are invited so lets send to confirm
+            this.invitedId = resp.id
+            this.userInvited = true
+            this.userNotFound = false
+            errorCaught = true
+          }
+        }
+        if (!errorCaught) {
+          this.userInvited = false
+          this.userNotFound = true
+        }
         this.loggingIn = false
       }
     },
@@ -193,6 +204,25 @@ export default {
     async register(fields) {
       this.joinLoading = true
       console.log('register attendee', fields)
+      try {
+        await this.$extream.user.completeUser(fields.id, {
+          firstName: fields.firstName,
+          lastName: fields.lastName,
+          email: fields.email,
+          username: fields.email,
+          user_type: 'audience',
+          user: { displayName: fields.username },
+          password: Date.now(),
+        })
+        this.login(fields.email)
+      } catch (error) {
+        const resp = await error.json()
+        if (resp.message === 'user not found') {
+          this.userNotFound = true
+        } else {
+          this.regError = true
+        }
+      }
       this.joinLoading = false
     },
     choice(choice) {
