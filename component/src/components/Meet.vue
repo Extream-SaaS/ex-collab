@@ -1,13 +1,14 @@
 <template>
-  <div>
-    <v-banner
-      single-line
-    >{{ meeting.subject }}</v-banner>
+  <div class="fullscreen" @mousemove="showActionBar">
+    <v-fade-transition>
+      <v-banner class="banner white--text" app v-show="visibleButtons">{{ meeting.subject }}</v-banner>
+    </v-fade-transition>
     <web-rtc-call
       v-if="connected"
       collab-url="https://collab.extream.app"
       :item-id="meeting.id"
       view="thumbnails"
+      :visible-buttons="visibleButtons"
       @close="end"
     />
     <v-container v-else-if="error">
@@ -31,6 +32,9 @@ export default {
     connected: false,
     spinner: 0,
     error: '',
+    visibleButtons: true,
+    buttonTimeout: null,
+    buttonDelay: 1800,
   }),
   beforeMount() {
     const roomId = this.$route.params.room
@@ -49,6 +53,14 @@ export default {
     },
   },
   methods: {
+    showActionBar() {
+      clearTimeout(this.buttonTimeout)
+      this.visibleButtons = true
+      this.buttonTimeout = setTimeout(() => {
+        console.log('hiding buttons')
+        this.visibleButtons = false
+      }, this.buttonDelay)
+    },
     checkAuthenticated() {
       if (localStorage.getItem('isAuthenticated') !== 'true') {
         setTimeout(this.checkAuthenticated, 1000)
@@ -88,3 +100,17 @@ export default {
   },
 }
 </script>
+<style scoped>
+.banner {
+  position: fixed !important;
+  z-index: 10;
+  width: 100vw;
+}
+.fullscreen {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+}
+</style>

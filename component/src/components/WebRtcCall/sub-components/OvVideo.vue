@@ -1,6 +1,6 @@
 <template>
   <video
-    class="w-full h-full"
+    class="video-holder"
     :class="fit"
     autoplay
     playsinline
@@ -28,3 +28,15 @@ export default {
   }
 }
 </script>
+<style scoped>
+.video-holder {
+  width: 100%;
+  height: 100%;
+}
+.object-cover {
+  object-fit: cover;
+}
+.object-contain {
+  object-fit: contain;
+}
+</style>

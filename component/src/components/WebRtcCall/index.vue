@@ -3,100 +3,94 @@
     role="dialog"
     aria-modal="true"
   >
-    <div>
-      <div
-        v-if="!loading"
+    <div
+      v-if="!loading"
+    >
+      <template v-if="view == 'spotlight' || view == 'thumbnails'">
+        <user-video
+          v-if="currentSpeaker"
+          :stream-manager="subscribers.find(
+            (sub) => sub.stream.streamId === currentSpeaker
+          )"
+          :show-name="false"
+          fit="object-cover"
+        />
+        <user-video
+          v-else-if="publisher"
+          :stream-manager="publisher"
+          :show-name="false"
+          fit="object-cover"
+        />
+      </template>
+      <v-slide-group
+        v-if="showCall && (view == 'tiled' || view == 'thumbnails')"
+        :class="view"
+        show-arrows
       >
-        <div>
-          <template v-if="view == 'spotlight' || view == 'thumbnails'">
+        <v-slide-item
+          v-if="publisher && publisher.stream"
+        >
+          <v-card class="ma-4 thumbnail" width="280" height="160">
             <user-video
-              v-if="currentSpeaker"
-              :stream-manager="subscribers.find(
-                (sub) => sub.stream.streamId === currentSpeaker
-              )"
-              fit="object-cover"
-            />
-            <user-video
-              v-else
               :stream-manager="publisher"
-              fit="object-cover"
             />
-          </template>
-          <span
-            v-if="subscribers.length == 0 && showCall"
-            class="text-sm"
-          >
-            We are connecting your call
-          </span>
-          <div
-            v-if="showCall"
-            id="video-container"
-            class="flex h-128"
-          >
-            <template v-if="view == 'tiled' || view == 'thumbnails'">
-              <user-video
-                v-if="publisher"
-                :stream-manager="publisher"
-                class="flex-1 h-full border-white border-4"
-                @click.native="updateMainVideoStreamManager(publisher)"
-              />
-              <user-video
-                v-for="(sub, index) in subscribers"
-                :key="index"
-                :stream-manager="sub"
-                :class="[
-                  currentSpeaker === sub.stream.streamId
-                    ? 'border-black'
-                    : 'border-white',
-                  currentSharer === sub.stream.streamId
-                    ? 'absolute w-full z-10 left-0'
-                    : 'relative',
-                ]"
-                :fit="
-                  currentSharer === sub.stream.streamId
-                    ? 'object-contain'
-                    : 'object-cover'
-                "
-                class="flex-1 h-full border-4"
-                @click.native="updateMainVideoStreamManager(sub)"
-              />
-            </template>
-          </div>
-          <div
-            v-else
-            class="flex text-center justify-around flex-col h-128"
-          >
-            <h1>
-              There was no answer
-            </h1>
-            <div class="flex justify-evenly">
-              <base-button
-                text="Yes"
-                @click.native="requestCallBack"
-              />
-              <base-button
-                text="No"
-                @click.native="$emit('close')"
-              />
-            </div>
-          </div>
+          </v-card>
+        </v-slide-item>
+        <v-slide-item
+          v-for="(sub, index) in subscribers"
+          :key="index"
+        >
+          <v-card class="ma-4 thumbnail" width="280" height="160">
+            <user-video
+              :stream-manager="sub"
+              :class="[
+                currentSpeaker === sub.stream.streamId
+                  ? 'border-black'
+                  : 'border-white',
+                currentSharer === sub.stream.streamId
+                  ? 'absolute w-full z-10 left-0'
+                  : 'relative',
+              ]"
+              :fit="
+                currentSharer === sub.stream.streamId
+                  ? 'object-contain'
+                  : 'object-cover'
+              "
+            />
+          </v-card>
+        </v-slide-item>
+      </v-slide-group>
+      <div v-else>
+        <h1>
+          There was no answer
+        </h1>
+        <div>
+          <base-button
+            text="Yes"
+            @click="requestCallBack"
+          />
+          <base-button
+            text="No"
+            @click="$emit('close')"
+          />
         </div>
       </div>
-      <div v-else>
-        <base-spinner class="w-16 mx-auto text-blue" />
-        <p class="text-sm">
-          Loading
-        </p>
-      </div>
+      <v-snackbar
+        :value="subscribers.length == 0 && showCall"
+      >
+        We are connecting your call
+      </v-snackbar>
     </div>
-    <div
-      v-if="showCall"
-      class="bg-gray-lighter px-4 py-3 sm:px-6 w-auto ml-auto mr-auto flex justify-center"
-    >
-      <span class="flex w-full rounded-md sm:ml-3 sm:w-auto">
-        <button
+    <div v-else>
+      <base-spinner />
+      <p>
+        Loading
+      </p>
+    </div>
+    <v-fade-transition>
+      <v-btn-toggle rounded v-show="showCall && visibleButtons" class="buttons">
+        <v-btn
           type="button"
-          class="inline-flex justify-center w-24 px-2 py-2 text-base leading-6 font-medium hover:text-red focus:outline-none transition ease-in-out duration-150 sm:text-2xl sm:leading-5"
           @click="toggleAudio"
         >
           <v-icon
@@ -107,12 +101,9 @@
             v-else
             size="lg"
           >mdi-microphone-off</v-icon>
-        </button>
-      </span>
-      <span class="flex w-full rounded-md sm:ml-3 sm:w-auto">
-        <button
+        </v-btn>
+        <v-btn
           type="button"
-          class="inline-flex justify-center w-24 px-2 py-2 text-base leading-6 font-medium hover:text-red focus:outline-none transition ease-in-out duration-150 sm:text-2xl sm:leading-5"
           @click="toggleVideo"
         >
           <v-icon
@@ -123,12 +114,9 @@
             v-else
             size="lg"
           >mdi-video-off</v-icon>
-        </button>
-      </span>
-      <span class="flex w-full rounded-md sm:ml-3 sm:w-auto">
-        <button
+        </v-btn>
+        <v-btn
           type="button"
-          class="inline-flex justify-center w-24 px-2 py-2 text-base leading-6 font-medium hover:text-red focus:outline-none transition ease-in-out duration-150 sm:text-2xl sm:leading-5"
           @click="toggleScreen"
         >
           <v-icon
@@ -139,22 +127,19 @@
             v-else
             size="lg"
           >mdi-laptop-off</v-icon>
-        </button>
-      </span>
-    </div>
-    <div class="absolute right-0 -mt-16 mr-8">
-      <span class="flex w-full rounded-md sm:ml-3 sm:w-auto ml-auto">
-        <button
+        </v-btn>
+        <v-btn
           type="button"
-          class="inline-flex justify-center rounded-full w-full px-3 py-2 text-base leading-6 font-medium hover:bg-red-lighter focus:outline-none transition ease-in-out duration-150 sm:text-2xl sm:leading-5"
+          color="red"
           @click="end"
         >
           <v-icon
             size="lg"
-          >mdi-close-octagon</v-icon>
-        </button>
-      </span>
-    </div>
+            color="white"
+          >mdi-phone-hangup</v-icon>
+        </v-btn>
+      </v-btn-toggle>
+    </v-fade-transition>
   </div>
 </template>
 
@@ -187,6 +172,11 @@ export default {
     loading: {
       type: Boolean,
       default: false
+    },
+    visibleButtons: {
+      type: Boolean,
+      required: true,
+      default: false,
     },
     view: {
       type: String,
@@ -348,12 +338,13 @@ export default {
         }
       })
       this.session.on('publisherStartSpeaking', ({ streamId }) => {
-        this.currentSpeaker = streamId
+        if (streamId !== this.publisher.streamId) {
+          this.currentSpeaker = streamId
+        }
       })
-      this.session.on('publisherStopSpeaking', ({ streamId }) => {
-        console.log('stop speaking stream id', streamId)
-        this.currentSpeaker = null
-      })
+      // this.session.on('publisherStopSpeaking', ({ streamId }) => {
+      //   this.currentSpeaker = null
+      // })
       // On every Stream destroyed...
       this.session.on('streamDestroyed', ({ stream }) => {
         const index = this.subscribers.indexOf(stream.streamManager, 0)
@@ -431,3 +422,28 @@ export default {
   }
 }
 </script>
+<style scoped>
+.thumbnails {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  z-index: 10;
+}
+.buttons {
+  position: fixed;
+  z-index: 10;
+  bottom: 180px;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  width: 197px;
+}
+.tiled {
+
+}
+.thumbnail {
+  overflow: hidden;
+}
+</style>

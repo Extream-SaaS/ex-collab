@@ -96,7 +96,6 @@
           >
             <v-text-field
               v-model="join.pin"
-              :counter="6"
               :error-messages="errors"
               label="Meeting Pin"
               required

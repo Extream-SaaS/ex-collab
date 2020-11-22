@@ -1,16 +1,13 @@
 <template>
-  <div
-    v-if="streamManager"
-    class="relative"
-  >
+  <v-card v-if="streamManager">
     <ov-video
       :stream-manager="streamManager"
       :fit="fit"
     />
-    <div class="absolute bottom-0 right-0 bg-white bg-opacity-75 px-4 py-1">
+    <v-card-subtitle class="client-name white--text" v-if="showName">
       {{ clientData }}
-    </div>
-  </div>
+    </v-card-subtitle>
+  </v-card>
 </template>
 
 <script>
@@ -30,7 +27,12 @@ export default {
       type: String,
       required: false,
       default: 'object-cover'
-    }
+    },
+    showName: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
 
   computed: {
@@ -50,3 +52,9 @@ export default {
   }
 }
 </script>
+<style scoped>
+.client-name {
+  position: absolute;
+  bottom: 0;
+}
+</style>

@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app dark>
     <v-app-bar
       app
       color="primary"
@@ -47,7 +47,11 @@
 			</v-menu>
     </v-app-bar>
     <v-main>
-      <router-view></router-view>
+
+      <!-- Provides the application the proper gutter -->
+      <v-container fluid>
+        <router-view></router-view>
+      </v-container>
     </v-main>
     <v-dialog :value="!loggedIn && !roomId && !joined" persistent :width="width">
       <v-login @login="login" :login-error="loginError" :user-not-found="userNotFound" :loading="loggingIn" />
@@ -196,8 +200,7 @@ export default {
     },
     async join(fields) {
       this.joinLoading = true
-      console.log('join', fields)
-
+      this.$router.push(`/${fields.pin}`)
       this.joinLoading = false
       this.joined = true
     },
