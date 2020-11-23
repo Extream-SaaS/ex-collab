@@ -518,7 +518,7 @@ export default {
         id: this.$extreamData.itemId,
         data: {
           instance: this.itemId,
-          emails: this.emails
+          emails: this.invite.emails
         },
       })
     },
