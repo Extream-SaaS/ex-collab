@@ -20,7 +20,7 @@
         v-else-if="register && userInvited"
         ref="register"
         v-slot="{ invalid }"
-        :key="'user'"
+        :key="'register'"
       >
         <v-form @submit.prevent="userSubmit">
           <validation-provider
@@ -96,7 +96,7 @@
         v-else
         ref="login"
         v-slot="{ invalid }"
-        :key="'user'"
+        :key="'login'"
       >
         <v-form @submit.prevent="submit">
           <validation-provider

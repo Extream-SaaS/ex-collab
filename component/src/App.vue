@@ -47,7 +47,6 @@
 			</v-menu>
     </v-app-bar>
     <v-main>
-
       <!-- Provides the application the proper gutter -->
       <v-container fluid>
         <router-view></router-view>
@@ -100,26 +99,14 @@ export default {
     invitedId: '',
   }),
   async beforeMount() {
-    this.roomId = this.$route.params.room
-    this.joinView = this.roomId ? 'register' : 'choice'
-    this.joinAction = this.roomId ? 'Your details' : ''
-    if (this.loggedIn) {
-      // need to reauth the user
-      const { accessToken } = JSON.parse(localStorage.getItem('session'))
-      try {
-        const user = await this.$extream.connect(accessToken)
-        localStorage.setItem('user', JSON.stringify(user))
-      } catch (error) {
-        this.loggedIn = false
-        localStorage.setItem('isAuthenticated', false)
-        localStorage.setItem('session', JSON.stringify({}))
-        localStorage.setItem('user', null)
-      } finally {
-        this.authCheck = false
+    this.checkModals()
+  },
+  watch: {
+    $route(to, from) {
+      if (to.path === '/' && to.path !== from.path) {
+        this.checkModals()
       }
-    } else {
-      this.authCheck = false
-    }
+    },
   },
   computed: {
     width () {
@@ -133,17 +120,39 @@ export default {
     },
   },
   methods: {
+    async checkModals() {
+      this.roomId = this.$route.params.room
+      this.joinView = this.roomId ? 'register' : 'choice'
+      this.joinAction = this.roomId ? 'Your details' : ''
+      if (this.loggedIn) {
+        // need to reauth the user
+        const { accessToken } = JSON.parse(localStorage.getItem('session'))
+        try {
+          const user = await this.$extream.connect(accessToken)
+          localStorage.setItem('user', JSON.stringify(user))
+        } catch (error) {
+          this.loggedIn = false
+          localStorage.setItem('isAuthenticated', false)
+          localStorage.setItem('session', JSON.stringify({}))
+          localStorage.setItem('user', null)
+        } finally {
+          this.authCheck = false
+        }
+      } else {
+        this.authCheck = false
+      }
+    },
     async login (user) {
       this.loggingIn = true
       try {
-        const { password, username } = await this.$extream.user.fetchUser(user.username)
+        const { password, username } = await this.$extream.user.fetchUser(encodeURIComponent(user.username))
         const {
           id,
           accessToken,
           accessTokenExpiresAt,
           refreshToken,
           refreshTokenExpiresAt
-        } = await this.$extream.user.login(username, password, this.$extreamData.eventId)
+        } = await this.$extream.user.login(encodeURIComponent(username), encodeURIComponent(password), this.$extreamData.eventId)
         this.token = accessToken
         const authUser = await this.$extream.connect(accessToken)
         localStorage.setItem('isAuthenticated', true)
@@ -160,8 +169,10 @@ export default {
         this.loggedIn = true
       } catch (error) {
         let errorCaught = false
+        console.log(error)
         if (error.body) {
           const resp = await error.json()
+          console.log(resp)
           if (resp.error === 'user is not activated') {
             // they are invited so lets send to confirm
             this.invitedId = resp.id
