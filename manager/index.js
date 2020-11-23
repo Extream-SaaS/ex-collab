@@ -196,6 +196,7 @@ exports.manage = async (event, context, callback) => {
           await instanceRef.set({
             ...payload,
             participants: payload.data.participants,
+            invited: payload.data.emails,
             status: 'pending',
             addedBy: user.id,
             addedAt: Firestore.FieldValue.serverTimestamp(),
@@ -560,6 +561,9 @@ exports.manage = async (event, context, callback) => {
         } else if (data.configuration.mode === 'group') {
           await instanceRef.set({
             participants: admin.firestore.FieldValue.arrayUnion(payload.data.participants),
+            invited: admin.firestore.FieldValue.arrayUnion(payload.data.emails),
+          }, {
+            merge: true
           });
         }
         await publish('ex-gateway', source, { domain, action, command, payload: { ...payload }, user, socketId });
