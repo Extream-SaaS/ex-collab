@@ -169,10 +169,8 @@ export default {
         this.loggedIn = true
       } catch (error) {
         let errorCaught = false
-        console.log(error)
         if (error.body) {
           const resp = await error.json()
-          console.log(resp)
           if (resp.error === 'user is not activated') {
             // they are invited so lets send to confirm
             this.invitedId = resp.id

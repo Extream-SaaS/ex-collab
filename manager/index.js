@@ -536,6 +536,39 @@ exports.manage = async (event, context, callback) => {
         callback(0);
       }
       break;
+    case 'add':
+      try {
+        console.log('payload', payload);
+        const docRef = db.collection('sessions').doc(payload.id);
+        const session = await docRef.get();
+
+        if (!session.exists) {
+          throw new Error('item not found');
+        }
+
+        let data = session.data();
+        const instanceRef = docRef.collection('instances').doc(payload.data.instance);
+
+        payload.data.mode = data.configuration.mode;
+
+        if (data.configuration.mode === 'instant' && payload.data.participants) {
+          await instanceRef.set({
+            participants: admin.firestore.FieldValue.arrayUnion(payload.data.participants),
+          });
+        } else if (data.configuration.mode === 'instant' && !payload.data.participants) {
+          throw new Error('participants required');
+        } else if (data.configuration.mode === 'group') {
+          await instanceRef.set({
+            participants: admin.firestore.FieldValue.arrayUnion(payload.data.participants),
+          });
+        }
+        await publish('ex-gateway', source, { domain, action, command, payload: { ...payload }, user, socketId });
+        callback();
+      } catch (error) {
+        await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
+        callback(0);
+      }
+      break;
     case 'sign':
       if (action === 'zoom') {
         const apiKey = 'iy8bpRGDEjKzDXYt5sx3KxGBtALmxiSdk7yY';
