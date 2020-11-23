@@ -8266,6 +8266,11 @@ vm-browserify@^1.0.1:
   resolved "https://registry.yarnpkg.com/vm-browserify/-/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
   integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
 
+vue-blurhash@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/vue-blurhash/-/vue-blurhash-0.1.2.tgz#daa9c5078c205b2ffc484310a37db506d2f82fb4"
+  integrity sha512-VfIiQW2+F1HsJktumGsEwCsp0CYLdnmTcCA3nMvZ8Bze8bkpp9tonIygzBnjUKN0WZyOxb22i9QQ+lqgngjedA==
+
 vue-cli-plugin-vuetify@~2.0.7:
   version "2.0.7"
   resolved "https://registry.yarnpkg.com/vue-cli-plugin-vuetify/-/vue-cli-plugin-vuetify-2.0.7.tgz#fcb4f1655e7c9199ee40dcbf6465e2355fd074d5"

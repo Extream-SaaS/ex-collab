@@ -17,6 +17,7 @@
     "socket.io-client": "2.3.0",
     "vee-validate": "^3.4.5",
     "vue": "2.6.11",
+    "vue-blurhash": "^0.1.2",
     "vue-router": "^3.4.9",
     "vuetify": "^2.2.11"
   },

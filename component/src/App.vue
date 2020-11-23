@@ -1,5 +1,6 @@
 <template>
   <v-app dark>
+    <blur-hash-image v-if="unsplash" :hash="unsplash.blur_hash" :src="unsplash.urls.regular" class="cover" />
     <v-app-bar
       app
       color="primary"
@@ -97,9 +98,11 @@ export default {
     userNotFound: false,
     userInvited: false,
     invitedId: '',
+    unsplash: null,
   }),
   async beforeMount() {
     this.checkModals()
+    this.unsplashRandom()
   },
   watch: {
     $route(to, from) {
@@ -120,6 +123,12 @@ export default {
     },
   },
   methods: {
+    async unsplashRandom() {
+      const resp = await fetch('https://generator.extream.app/background/random')
+      if (resp.status === 200) {
+        this.unsplash = await resp.json()
+      }
+    },
     async checkModals() {
       this.roomId = this.$route.params.room
       this.joinView = this.roomId ? 'register' : 'choice'
@@ -249,3 +258,12 @@ export default {
   }
 };
 </script>
+<style>
+.cover {
+  width: 100vw;
+  height: 100vh;
+}
+.cover > span > img {
+  object-fit: cover;
+}
+</style>
