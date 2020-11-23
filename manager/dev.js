@@ -40,15 +40,37 @@ let payload, data, event;
 //   socketId: 'XbTiLsd9CmFwzEafAAAA'
 // };
 
+// payload = {
+//   domain: 'client',
+//   action: 'webrtc',
+//   command: 'start',
+//   source: 'rw-local',
+//   payload: {
+//     id: "fF9KUD0z1Ic5zGeEZd8O",
+//     data: {
+//       instance: 'new-instance',
+//       emails: ['richard@zest4.tv'],
+//       participants: [],
+//     }
+//   },
+//   user: {
+//     id: '091e8b52-8506-4512-b75e-149ee51c4f04',
+//     username: 'tester',
+//     fields: { custom: 'fields' },
+//     token: 'e7c070e8d69b28093154bb7c4ca7602af8bd1cd4'
+//   },
+//   socketId: 'XbTiLsd9CmFwzEafAAAA'
+// };
 payload = {
   domain: 'client',
   action: 'webrtc',
-  command: 'start',
+  command: 'add',
   source: 'rw-local',
   payload: {
-    id: "zl7f3ImElDfwbFJuXcf5",
+    id: "fF9KUD0z1Ic5zGeEZd8O",
     data: {
-      user: 'a71050de-2405-4094-8116-8a549b3f66f7',
+      instance: 'new-instance',
+      emails: ['richard@smg.digital'],
     }
   },
   user: {
