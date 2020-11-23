@@ -14,18 +14,18 @@
       <v-container v-else-if="showChoice" fluid>
         <v-row dense>
           <v-col>
-            <v-card>
+            <v-card class="text-center">
               <v-card-title>Join an existing meeting</v-card-title>
               <v-card-text>
-                <v-btn @click="existingMeeting" text>Enter your meeting pin</v-btn>
+                <v-btn @click="existingMeeting" text color="green">Enter your meeting pin</v-btn>
               </v-card-text>
             </v-card>
           </v-col>
           <v-col>
-            <v-card>
+            <v-card class="text-center">
               <v-card-title>Create a new meeting</v-card-title>
               <v-card-text>
-                <v-btn @click="newMeeting" text>Enter meeting details</v-btn>
+                <v-btn @click="newMeeting" text color="green">Enter meeting details</v-btn>
               </v-card-text>
             </v-card>
           </v-col>

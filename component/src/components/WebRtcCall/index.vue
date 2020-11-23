@@ -59,6 +59,66 @@
             />
           </v-card>
         </v-slide-item>
+        <v-dialog v-model="showInviteDialog" max-width="600px">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+                color="green"
+                fab
+                dark
+                x-small
+                v-bind="attrs"
+                v-on="on"
+            >
+              <v-icon dark>
+                mdi-plus
+              </v-icon>
+            </v-btn>
+          </template>
+          <v-card>
+            <v-card-title>
+              <span class="headline">Invite</span>
+            </v-card-title>
+            <v-card-text>
+              <validation-observer ref="invite"
+                                   v-slot="{ invalid }"
+                                   :key="'invite'"
+              >
+                <v-form @submit.prevent="sendInvitation">
+                  <validation-provider
+                      v-slot="{ errors }"
+                      name="Participants"
+                      rules="required|email"
+                      :key="'participants'"
+                  >
+                    <v-combobox
+                        v-model="invite.emails"
+                        :error-messages="errors"
+                        :items="addressBook"
+                        append-icon=""
+                        label="Participants"
+                        multiple
+                        chips
+                        deletable-chips
+                        :delimiters="[',', ';', ' ']"
+                        type="email"
+                    ></v-combobox>
+                  </validation-provider>
+                  <v-btn class="mr-4 my-2" @click="closeModal">
+                    Cancel
+                  </v-btn>
+                  <v-btn
+                      class="mr-4 my-2"
+                      type="submit"
+                      :disabled="invalid || loading"
+                      :loading="loading"
+                  >
+                    send
+                  </v-btn>
+                </v-form>
+              </validation-observer>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
       </v-slide-group>
       <div v-else>
         <h1>
@@ -146,11 +206,29 @@
 <script>
 import { OpenVidu } from 'openvidu-browser'
 import UserVideo from './sub-components/UserVideo'
+import { required, email, max } from 'vee-validate/dist/rules'
+import { extend, ValidationObserver, ValidationProvider } from 'vee-validate'
 
+extend('required', {
+  ...required,
+  message: '{_field_} can not be empty',
+})
+
+extend('max', {
+  ...max,
+  message: '{_field_} may not be greater than {length} characters',
+})
+
+extend('email', {
+  ...email,
+  message: 'Email must be valid',
+})
 export default {
   name: 'WebRtcCall',
   components: {
-    UserVideo
+    UserVideo,
+    ValidationProvider,
+    ValidationObserver,
   },
   props: {
     itemId: {
@@ -199,6 +277,12 @@ export default {
       showCall: true,
       exSession: JSON.parse(localStorage.getItem('session')),
       exUser: JSON.parse(localStorage.getItem('user')),
+      showInviteDialog: false,
+      invite: {
+        emails: []
+      },
+      addressBook: [],
+      isSending: false,
     }
   },
   watch: {
@@ -418,7 +502,29 @@ export default {
         }
       )
       return resp.json()
-    }
+    },
+    sendInvitation() {
+      this.$refs['invite'].validate()
+      this.isSending = true
+      this.$extream.socket.off('client_webrtc_add')
+      this.$extream.on(`client_webrtc_add`, (resp) => {
+        if (resp.payload && !resp.error) {
+          this.isSending = false
+          this.emails = []
+          this.showInviteDialog = false
+        }
+      })
+      this.$extream.emit(`client_webrtc_add`, {
+        id: this.$extreamData.itemId,
+        data: {
+          instance: this.itemId,
+          emails: this.emails
+        },
+      })
+    },
+    closeModal() {
+      this.showInviteDialog = false
+    },
   }
 }
 </script>
