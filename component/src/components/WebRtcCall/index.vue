@@ -109,8 +109,8 @@
                   <v-btn
                       class="mr-4 my-2"
                       type="submit"
-                      :disabled="invalid || loading"
-                      :loading="loading"
+                      :disabled="invalid || isSending"
+                      :loading="isSending"
                   >
                     send
                   </v-btn>
@@ -510,7 +510,7 @@ export default {
       this.$extream.on(`client_webrtc_add`, (resp) => {
         if (resp.payload && !resp.error) {
           this.isSending = false
-          this.emails = []
+          this.invite.emails = []
           this.showInviteDialog = false
         }
       })
