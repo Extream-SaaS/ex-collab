@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <div v-if="connected" @mousemove="showActionBar">
+    <div v-if="connected" class="fullscreen" @mousemove="showActionBar">
       <v-fade-transition>
         <v-banner class="banner white--text" app v-show="visibleButtons">{{ meeting.subject }}</v-banner>
       </v-fade-transition>
