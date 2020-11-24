@@ -3,8 +3,57 @@
     role="dialog"
     aria-modal="true"
   >
+    <v-dialog v-model="showLandingDialog" max-width="600px">
+      <v-card class="text-center">
+        <v-card-title class="headline mb-4">
+        </v-card-title>
+        <v-card-subtitle class="headline mb-4">
+          <span>Welcome</span>
+        </v-card-subtitle>
+        <v-card-text>
+          <v-btn-toggle rounded>
+          <v-btn
+              x-large
+              type="button"
+              @click="toggleAudio"
+          >
+            <v-icon
+                v-if="publishAudio"
+                size="lg"
+            >mdi-microphone</v-icon>
+            <v-icon
+                v-else
+                size="lg"
+            >mdi-microphone-off</v-icon>
+          </v-btn>
+          <v-btn
+              x-large
+              type="button"
+              @click="toggleVideo"
+          >
+            <v-icon
+                v-if="publishVideo"
+                size="lg"
+            >mdi-video</v-icon>
+            <v-icon
+                v-else
+                size="lg"
+            >mdi-video-off</v-icon>
+          </v-btn>
+            <v-btn
+                x-large
+                type="button"
+                color="green lighten-5"
+                @click="joinSession"
+            >
+             Join
+            </v-btn>
+          </v-btn-toggle>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
     <div
-      v-if="!loading"
+      v-if="!loading && !showLandingDialog"
     >
       <template v-if="view == 'spotlight' || view == 'thumbnails'">
         <user-video
@@ -302,6 +351,7 @@ export default {
       },
       addressBook: [],
       isSending: false,
+      showLandingDialog: true,
     }
   },
   watch: {
@@ -316,7 +366,6 @@ export default {
     console.log('loading before mount', this.loading)
     if (!this.loading) {
       this.user = await this.verifyUser(this.exSession.accessToken)
-      this.joinSession()
     }
   },
   beforeDestroy () {
@@ -465,8 +514,8 @@ export default {
             const publisher = this.OV.initPublisher(undefined, {
               audioSource: undefined, // The source of audio. If undefined default microphone
               videoSource: undefined, // The source of video. If undefined default webcam
-              publishAudio: true, // Whether you want to start publishing with your audio unmuted or not
-              publishVideo: true, // Whether you want to start publishing with your video enabled or not
+              publishAudio: this.publishAudio, // Whether you want to start publishing with your audio unmuted or not
+              publishVideo: this.publishVideo, // Whether you want to start publishing with your video enabled or not
               resolution: '1280x720', // The resolution of your video
               insertMode: 'APPEND', // How the video is inserted in the target element 'video-container'
               mirror: true // Whether to mirror your local video or not
@@ -484,6 +533,7 @@ export default {
           })
       })
       window.addEventListener('beforeunload', this.leaveSession)
+      this.showLandingDialog = false
     },
     leaveSession () {
       // --- Leave the session by calling 'disconnect' method over the Session object ---
