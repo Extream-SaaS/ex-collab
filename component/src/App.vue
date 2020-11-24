@@ -260,10 +260,17 @@ export default {
 </script>
 <style>
 .cover {
+  position: absolute !important;
+  padding-bottom: 0 !important;
+  z-index: 0;
   width: 100vw;
   height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
 }
 .cover > span > img {
   object-fit: cover;
+  max-width: 100vw;
+  max-height: 100vh;
 }
 </style>
