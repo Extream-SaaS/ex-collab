@@ -178,14 +178,14 @@ export default {
     async login (user) {
       this.loggingIn = true
       try {
-        const { password, username } = await this.$extream.user.fetchUser(encodeURIComponent(user.username))
+        const { password, username } = await this.$extream.user.fetchUser(encodeURIComponent(user.username.toLowerCase()))
         const {
           id,
           accessToken,
           accessTokenExpiresAt,
           refreshToken,
           refreshTokenExpiresAt
-        } = await this.$extream.user.login(encodeURIComponent(username), encodeURIComponent(password), this.$extreamData.eventId)
+        } = await this.$extream.user.login(encodeURIComponent(username.toLowerCase()), encodeURIComponent(password), this.$extreamData.eventId)
         this.token = accessToken
         const authUser = await this.$extream.connect(accessToken)
         localStorage.setItem('isAuthenticated', true)
@@ -235,14 +235,14 @@ export default {
           title: fields.title,
           register: true,
           generator: 'memorable',
-          emails: fields.emails,
+          emails: fields.emails.map((email) => email.toLowerCase()),
           baseURL: window.location.origin,
         },
       })
     },
     async join(fields) {
       this.joinLoading = true
-      this.$router.push(`/${fields.pin}`)
+      this.$router.push(`/${fields.pin.trim()}`)
       this.joinLoading = false
       this.joined = true
     },
@@ -253,13 +253,13 @@ export default {
         await this.$extream.user.completeUser(fields.id, {
           firstName: fields.firstName,
           lastName: fields.lastName,
-          email: fields.email,
-          username: fields.email,
+          email: fields.email.toLowerCase(),
+          username: fields.email.toLowerCase(),
           user_type: 'audience',
           user: { displayName: fields.username },
           password: Date.now(),
         })
-        this.login(fields.email)
+        this.login(fields.email.toLowerCase())
       } catch (error) {
         const resp = await error.json()
         if (resp.message === 'user not found') {

@@ -254,6 +254,11 @@ export default {
       type: String,
       required: true
     },
+    itemSubject: {
+      type: String,
+      required: false,
+      default: '',
+    },
     collabUrl: {
       type: String,
       required: true
@@ -459,7 +464,7 @@ export default {
       this.getToken(this.itemId).then((resp) => {
         const token = resp[0]
         this.session
-          .connect(token, { clientData: this.exUser.firstName })
+          .connect(token, { clientData: this.exUser.fields.displayName || this.exUser.firstName || this.exUser.email })
           .then(() => {
             // --- Get your own camera stream with the desired properties ---
             const publisher = this.OV.initPublisher(undefined, {
@@ -536,8 +541,10 @@ export default {
       this.$extream.emit(`client_webrtc_add`, {
         id: this.$extreamData.itemId,
         data: {
+          title: this.itemSubject,
           instance: this.itemId,
-          emails: this.invite.emails
+          emails: this.invite.emails,
+          baseURL: window.location.origin,
         },
       })
     },

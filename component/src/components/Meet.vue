@@ -8,6 +8,7 @@
         collab-url="https://collab.extream.app"
         :item-id="meeting.id"
         view="thumbnails"
+        :item-subject="meeting.subject"
         :visible-buttons="visibleButtons"
         @close="end"
       />
