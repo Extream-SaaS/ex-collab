@@ -4,6 +4,8 @@ import Meet from './components/Meet'
 import App from './App'
 import SublimePlugin from './plugins/component-lib'
 import vuetify from './plugins/vuetify';
+import VueBlurHash from 'vue-blurhash'
+import 'vue-blurhash/dist/vue-blurhash.css'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import '@mdi/font/css/materialdesignicons.css'
 
@@ -21,6 +23,8 @@ const router = new VueRouter({
 });
 
 Vue.use(VueRouter)
+
+Vue.use(VueBlurHash)
 
 Vue.use(SublimePlugin, {
   auth: 'https://auth.extream.app',

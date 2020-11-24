@@ -1,21 +1,48 @@
 <template>
-  <div class="fullscreen" @mousemove="showActionBar">
-    <v-fade-transition>
-      <v-banner class="banner white--text" app v-show="visibleButtons">{{ meeting.subject }}</v-banner>
-    </v-fade-transition>
-    <web-rtc-call
-      v-if="connected"
-      collab-url="https://collab.extream.app"
-      :item-id="meeting.id"
-      view="thumbnails"
-      :visible-buttons="visibleButtons"
-      @close="end"
-    />
+  <v-container fluid>
+    <div v-if="connected" @mousemove="showActionBar">
+      <v-fade-transition>
+        <v-banner class="banner white--text" app v-show="visibleButtons">{{ meeting.subject }}</v-banner>
+      </v-fade-transition>
+      <web-rtc-call
+        collab-url="https://collab.extream.app"
+        :item-id="meeting.id"
+        view="thumbnails"
+        :visible-buttons="visibleButtons"
+        @close="end"
+      />
+    </div>
     <v-container v-else-if="error">
-      <p>{{ error }}</p>
+      <v-row no-gutters style="height: calc(100vh - 256px);">
+        <v-col
+          align-self="center"
+        >
+          <v-card class="pa-md-4  mx-auto" width="400">
+            <v-card-text>
+              <p>{{ error }}</p>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn to="/">Join a room</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+      </v-row>
     </v-container>
-    <v-skeleton-loader v-else type="image"></v-skeleton-loader>
-  </div>
+    <v-container v-else>
+      <v-row no-gutters style="height: calc(100vh - 256px);">
+        <v-col
+          align-self="center"
+        >
+          <v-card class="pa-md-4  mx-auto" width="400">
+            <v-card-text>
+              <p>Please wait while the room is loading.</p>
+              <v-skeleton-loader type="image" height="32"></v-skeleton-loader>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-container>
 </template>
 <script>
 import WebRtcCall from './WebRtcCall/index.vue'
@@ -74,7 +101,6 @@ export default {
       console.log('end call')
     },
     connectCall() {
-      console.log(localStorage.getItem('session'))
       const session = JSON.parse(localStorage.getItem('session'))
       const userId = session.id
       this.$extream.socket.off('consumer_webrtc_get')
@@ -84,10 +110,10 @@ export default {
             this.meeting.subject = resp.payload.instance.data.title
             this.connected = true
           } else {
-            this.error = 'access denied'
+            this.error = 'Access denied. Try logging out and switching user.'
           }
         } else if (resp.error) {
-          this.error = 'room not found'
+          this.error = 'The room could not be found. Please check the link and try again.'
         }
       })
       this.$extream.emit(`consumer_webrtc_get`, {

@@ -16,11 +16,30 @@
           fit="object-cover"
         />
         <user-video
-          v-else-if="publisher"
-          :stream-manager="publisher"
+          v-else-if="subscribers.length > 0"
+          :stream-manager="subscribers[0]"
           :show-name="false"
           fit="object-cover"
         />
+        <v-container v-else fluid>
+          <v-row no-gutters style="height: calc(100vh - 256px);">
+            <v-col
+              align-self="center"
+            >
+              <v-card class="pa-md-4  mx-auto" width="400">
+                <v-card-text>
+                  <h2 class="mb-2">Looks like you&apos;re the first one here.</h2>
+                  <h3 class="mb-2">The others should be along shortly.</h3>
+                  <p>Unless it&apos;s the wrong place? Wrong time?<br />
+                  Not to worry, you can join another room.</p>
+                </v-card-text>
+                <v-card-actions>
+                  <v-btn to="/">Join a room</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
       </template>
       <v-slide-group
         v-if="showCall && (view == 'tiled' || view == 'thumbnails')"

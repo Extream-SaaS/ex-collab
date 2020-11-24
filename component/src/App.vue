@@ -1,5 +1,6 @@
 <template>
   <v-app dark>
+    <blur-hash-image v-if="unsplash" :hash="unsplash.blur_hash" :src="unsplash.urls.regular" class="cover" />
     <v-app-bar
       app
       color="primary"
@@ -47,7 +48,6 @@
 			</v-menu>
     </v-app-bar>
     <v-main>
-
       <!-- Provides the application the proper gutter -->
       <v-container fluid>
         <router-view></router-view>
@@ -69,6 +69,30 @@
     <v-dialog :value="!loggedIn && roomId && !joined && !authCheck" persistent :width="width">
       <v-login @login="login" @register="register" :login-error="loginError" :reg-error="regError" :user-invited="userInvited" :invited-id="invitedId" :user-not-found="userNotFound" :register="true" :loading="loggingIn" />
     </v-dialog>
+    <v-footer
+      v-if="!loggedIn && !roomId && !joined"
+      padless
+      absolute
+      :elevation="4"
+      outlined
+      color="primary"
+      dark
+      style="z-index: 201;"
+    >
+      <v-card
+        class="flex"
+        flat
+        tile
+      >
+        <v-card-text class="text-center">
+          <span>&copy; Extream Ltd. {{ new Date().getFullYear() }}</span>
+          <v-spacer></v-spacer>
+          <span>Photo by <v-btn small :href="unsplash.user.links.html" target="_blank">
+            {{ unsplash.user.name }}
+          </v-btn> on <v-btn small href="https://unsplash.com" target="_blank">Unsplash</v-btn></span>
+        </v-card-text>
+      </v-card>
+    </v-footer>
   </v-app>
 </template>
 
@@ -98,28 +122,18 @@ export default {
     userNotFound: false,
     userInvited: false,
     invitedId: '',
+    unsplash: null,
   }),
   async beforeMount() {
-    this.roomId = this.$route.params.room
-    this.joinView = this.roomId ? 'register' : 'choice'
-    this.joinAction = this.roomId ? 'Your details' : ''
-    if (this.loggedIn) {
-      // need to reauth the user
-      const { accessToken } = JSON.parse(localStorage.getItem('session'))
-      try {
-        const user = await this.$extream.connect(accessToken)
-        localStorage.setItem('user', JSON.stringify(user))
-      } catch (error) {
-        this.loggedIn = false
-        localStorage.setItem('isAuthenticated', false)
-        localStorage.setItem('session', JSON.stringify({}))
-        localStorage.setItem('user', null)
-      } finally {
-        this.authCheck = false
+    this.checkModals()
+    this.unsplashRandom()
+  },
+  watch: {
+    $route(to, from) {
+      if (to.path === '/' && to.path !== from.path) {
+        this.checkModals()
       }
-    } else {
-      this.authCheck = false
-    }
+    },
   },
   computed: {
     width () {
@@ -133,17 +147,45 @@ export default {
     },
   },
   methods: {
+    async unsplashRandom() {
+      const resp = await fetch('https://generator.extream.app/background/random')
+      if (resp.status === 200) {
+        this.unsplash = await resp.json()
+      }
+    },
+    async checkModals() {
+      this.roomId = this.$route.params.room
+      this.joinView = this.roomId ? 'register' : 'choice'
+      this.joinAction = this.roomId ? 'Your details' : ''
+      if (this.loggedIn) {
+        // need to reauth the user
+        const { accessToken } = JSON.parse(localStorage.getItem('session'))
+        try {
+          const user = await this.$extream.connect(accessToken)
+          localStorage.setItem('user', JSON.stringify(user))
+        } catch (error) {
+          this.loggedIn = false
+          localStorage.setItem('isAuthenticated', false)
+          localStorage.setItem('session', JSON.stringify({}))
+          localStorage.setItem('user', null)
+        } finally {
+          this.authCheck = false
+        }
+      } else {
+        this.authCheck = false
+      }
+    },
     async login (user) {
       this.loggingIn = true
       try {
-        const { password, username } = await this.$extream.user.fetchUser(user.username)
+        const { password, username } = await this.$extream.user.fetchUser(encodeURIComponent(user.username))
         const {
           id,
           accessToken,
           accessTokenExpiresAt,
           refreshToken,
           refreshTokenExpiresAt
-        } = await this.$extream.user.login(username, password, this.$extreamData.eventId)
+        } = await this.$extream.user.login(encodeURIComponent(username), encodeURIComponent(password), this.$extreamData.eventId)
         this.token = accessToken
         const authUser = await this.$extream.connect(accessToken)
         localStorage.setItem('isAuthenticated', true)
@@ -240,3 +282,19 @@ export default {
   }
 };
 </script>
+<style>
+.cover {
+  position: absolute !important;
+  padding-bottom: 0 !important;
+  z-index: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+}
+.cover > span > img {
+  object-fit: cover;
+  max-width: 100vw;
+  max-height: 100vh;
+}
+</style>

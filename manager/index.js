@@ -196,6 +196,7 @@ exports.manage = async (event, context, callback) => {
           await instanceRef.set({
             ...payload,
             participants: payload.data.participants,
+            invited: payload.data.emails,
             status: 'pending',
             addedBy: user.id,
             addedAt: Firestore.FieldValue.serverTimestamp(),
@@ -210,9 +211,17 @@ exports.manage = async (event, context, callback) => {
             addedAt: Firestore.FieldValue.serverTimestamp(),
           });
         }
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('return start');
+          console.log(payload);
+        }
         await publish('ex-gateway', source, { domain, action, command, payload: { ...payload }, user, socketId });
         callback();
       } catch (error) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('error in start');
+          console.log(error);
+        }
         await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
         callback(0);
       }
@@ -533,6 +542,53 @@ exports.manage = async (event, context, callback) => {
         callback();
       } catch (err) {
         await publish('ex-gateway', source, { error: err.message, domain, action, command, payload, user, socketId });
+        callback(0);
+      }
+      break;
+    case 'add':
+      try {
+        console.log('payload', payload);
+        const docRef = db.collection('sessions').doc(payload.id);
+        const session = await docRef.get();
+
+        if (!session.exists) {
+          throw new Error('item not found');
+        }
+
+        let data = session.data();
+        const instanceRef = docRef.collection('instances').doc(payload.data.instance);
+
+        payload.data.mode = data.configuration.mode;
+
+        if (data.configuration.mode === 'instant') {
+          if (payload.data.emails) {
+            await instanceRef.set({
+              invited: admin.firestore.FieldValue.arrayUnion(...payload.data.emails),
+            }, {
+              merge: true
+            });
+          } else if (payload.data.participants) {
+            await instanceRef.set({
+              participants: admin.firestore.FieldValue.arrayUnion(...payload.data.participants),
+            }, {
+              merge: true
+            });
+          }
+        } else if (data.configuration.mode === 'instant' && !payload.data.participants) {
+          throw new Error('participants required');
+        } else if (data.configuration.mode === 'group') {
+          await instanceRef.set({
+            participants: admin.firestore.FieldValue.arrayUnion(payload.data.participants),
+          }, {
+            merge: true
+          });
+        }
+        console.log('success');
+        await publish('ex-gateway', source, { domain, action, command, payload: { ...payload }, user, socketId });
+        callback();
+      } catch (error) {
+        console.log(error);
+        await publish('ex-gateway', source, { error: error.message, domain, action, command, payload, user, socketId });
         callback(0);
       }
       break;
