@@ -41,6 +41,7 @@
 						v-for="(item, index) in items"
 						:key="index"
 						link
+            :to="item.link"
 					>
 						<v-list-item-title>{{ item.title }}</v-list-item-title>
 					</v-list-item>
@@ -53,10 +54,10 @@
         <router-view></router-view>
       </v-container>
     </v-main>
-    <v-dialog :value="!loggedIn && !roomId && !joined" persistent :width="width">
+    <v-dialog :value="(!loggedIn || loggedIn === 'false') && !roomId && !joined" persistent :width="width">
       <v-login @login="login" :login-error="loginError" :user-not-found="userNotFound" :loading="loggingIn" />
     </v-dialog>
-    <v-dialog :value="loggedIn && !roomId && !joined && !authCheck" persistent :width="width">
+    <v-dialog :value="loggedIn !== 'false' && !roomId && !joined && !authCheck" persistent :width="width">
       <v-join
         @choice="choice"
         @create="create"
@@ -111,7 +112,7 @@ export default {
     joinView: 'choice',
     loggingIn: false,
     items: [
-			{ title: 'Logout' },
+			{ title: 'Logout', link: '/logout' },
     ],
     loggedIn: localStorage.getItem('isAuthenticated'),
     roomId: null,
@@ -154,10 +155,11 @@ export default {
       }
     },
     async checkModals() {
+      this.loggedIn = localStorage.getItem('isAuthenticated')
       this.roomId = this.$route.params.room
       this.joinView = this.roomId ? 'register' : 'choice'
       this.joinAction = this.roomId ? 'Your details' : ''
-      if (this.loggedIn) {
+      if (this.loggedIn === 'true') {
         // need to reauth the user
         const { accessToken } = JSON.parse(localStorage.getItem('session'))
         try {

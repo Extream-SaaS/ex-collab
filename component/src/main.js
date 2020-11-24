@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Meet from './components/Meet'
+import Logout from './components/Logout'
 import App from './App'
 import SublimePlugin from './plugins/component-lib'
 import vuetify from './plugins/vuetify';
@@ -11,6 +12,11 @@ import '@mdi/font/css/materialdesignicons.css'
 
 Vue.config.productionTip = false
 const routes = [
+  {
+    path: '/logout',
+    name: 'Logout',
+    component: Logout,
+  },
   {
     path: '/:room',
     name: 'Meet',
