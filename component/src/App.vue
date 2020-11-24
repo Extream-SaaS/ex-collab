@@ -69,6 +69,30 @@
     <v-dialog :value="!loggedIn && roomId && !joined && !authCheck" persistent :width="width">
       <v-login @login="login" @register="register" :login-error="loginError" :reg-error="regError" :user-invited="userInvited" :invited-id="invitedId" :user-not-found="userNotFound" :register="true" :loading="loggingIn" />
     </v-dialog>
+    <v-footer
+      v-if="!loggedIn && !roomId && !joined"
+      padless
+      absolute
+      :elevation="4"
+      outlined
+      color="primary"
+      dark
+      style="z-index: 201;"
+    >
+      <v-card
+        class="flex"
+        flat
+        tile
+      >
+        <v-card-text class="text-center">
+          <span>&copy; Extream Ltd. {{ new Date().getFullYear() }}</span>
+          <v-spacer></v-spacer>
+          <span>Photo by <v-btn small :href="unsplash.user.links.html" target="_blank">
+            {{ unsplash.user.name }}
+          </v-btn> on <v-btn small href="https://unsplash.com" target="_blank">Unsplash</v-btn></span>
+        </v-card-text>
+      </v-card>
+    </v-footer>
   </v-app>
 </template>
 
