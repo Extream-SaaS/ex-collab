@@ -15,17 +15,17 @@
         <v-row dense>
           <v-col>
             <v-card class="text-center">
-              <v-card-title>Join an existing meeting</v-card-title>
+              <v-card-title>Join an existing space</v-card-title>
               <v-card-text>
-                <v-btn @click="existingMeeting" text color="green">Enter your meeting pin</v-btn>
+                <v-btn @click="existingMeeting" text color="green">Enter your space pin</v-btn>
               </v-card-text>
             </v-card>
           </v-col>
           <v-col>
             <v-card class="text-center">
-              <v-card-title>Create a new meeting</v-card-title>
+              <v-card-title>Create a new space</v-card-title>
               <v-card-text>
-                <v-btn @click="newMeeting" text color="green">Enter meeting details</v-btn>
+                <v-btn @click="newMeeting" text color="green">Enter space details</v-btn>
               </v-card-text>
             </v-card>
           </v-col>
@@ -90,14 +90,14 @@
         <v-form @submit.prevent="joinSubmit">
           <validation-provider
             v-slot="{ errors }"
-            name="Meeting Pin"
+            name="Space Pin"
             rules="required"
             :key="'meetingPin'"
           >
             <v-text-field
               v-model="join.pin"
               :error-messages="errors"
-              label="Meeting Pin"
+              label="Space Pin"
               required
             ></v-text-field>
           </validation-provider>

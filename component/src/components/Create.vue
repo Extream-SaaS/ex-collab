@@ -3,7 +3,7 @@
     class="mx-auto my-12"
     max-width="374"
   >
-    <v-card-title>Join room</v-card-title>
+    <v-card-title>Join space</v-card-title>
     <v-card-text>
       <validation-observer
         ref="observer"
@@ -12,7 +12,7 @@
         <form @submit.prevent="submit">
           <validation-provider
             v-slot="{ errors }"
-            name="Room pin"
+            name="Space pin"
             rules="required"
           >
             <v-text-field

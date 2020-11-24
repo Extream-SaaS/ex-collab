@@ -2,7 +2,7 @@
   <v-container fluid>
     <div v-if="connected" class="fullscreen" @mousemove="showActionBar">
       <v-fade-transition>
-        <v-banner class="banner white--text" app v-show="visibleButtons">{{ meeting.subject }}</v-banner>
+        <v-banner class="banner white--text" single-line v-show="visibleButtons">{{ meeting.subject }}</v-banner>
       </v-fade-transition>
       <web-rtc-call
         collab-url="https://collab.extream.app"
@@ -23,7 +23,7 @@
               <p>{{ error }}</p>
             </v-card-text>
             <v-card-actions>
-              <v-btn to="/">Join a room</v-btn>
+              <v-btn to="/">Join another space</v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -36,7 +36,7 @@
         >
           <v-card class="pa-md-4  mx-auto" width="400">
             <v-card-text>
-              <p>Please wait while the room is loading.</p>
+              <p>Please wait while the space is loading.</p>
               <v-skeleton-loader type="image" height="32"></v-skeleton-loader>
             </v-card-text>
           </v-card>
@@ -114,7 +114,7 @@ export default {
             this.error = 'Access denied. Try logging out and switching user.'
           }
         } else if (resp.error) {
-          this.error = 'The room could not be found. Please check the link and try again.'
+          this.error = 'The space could not be found. Please check the link and try again.'
         }
       })
       this.$extream.emit(`consumer_webrtc_get`, {
@@ -129,9 +129,10 @@ export default {
 </script>
 <style scoped>
 .banner {
-  position: fixed !important;
-  z-index: 10;
+  position: absolute !important;
+  z-index: 6;
   width: 100vw;
+  text-align: center;
 }
 .fullscreen {
   position: fixed;
@@ -139,5 +140,6 @@ export default {
   top: 0;
   width: 100vw;
   height: 100vh;
+  z-index: 5;
 }
 </style>

@@ -274,9 +274,9 @@ export default {
     },
     choice(choice) {
       if (choice === 'join') {
-        this.joinAction = 'Join meeting'
+        this.joinAction = 'Join space'
       } else if (choice === 'create') {
-        this.joinAction = 'Create meeting'
+        this.joinAction = 'Create space'
       } else {
         this.joinAction = ''
       }

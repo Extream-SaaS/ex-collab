@@ -3,7 +3,7 @@
     role="dialog"
     aria-modal="true"
   >
-    <v-dialog v-model="showLandingDialog" max-width="600px">
+    <v-dialog v-model="showLandingDialog" max-width="600px" persistent>
       <v-card class="text-center">
         <v-card-title class="headline mb-4">
         </v-card-title>
@@ -12,39 +12,53 @@
         </v-card-subtitle>
         <v-card-text>
           <v-btn-toggle rounded>
-          <v-btn
-              x-large
-              type="button"
-              @click="toggleAudio"
-          >
-            <v-icon
-                v-if="publishAudio"
-                size="lg"
-            >mdi-microphone</v-icon>
-            <v-icon
-                v-else
-                size="lg"
-            >mdi-microphone-off</v-icon>
-          </v-btn>
-          <v-btn
-              x-large
-              type="button"
-              @click="toggleVideo"
-          >
-            <v-icon
-                v-if="publishVideo"
-                size="lg"
-            >mdi-video</v-icon>
-            <v-icon
-                v-else
-                size="lg"
-            >mdi-video-off</v-icon>
-          </v-btn>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  x-large
+                  type="button"
+                  @click="toggleAudio"
+                  v-on="on"
+                >
+                  <v-icon
+                    v-if="publishAudio"
+                    size="lg"
+                  >mdi-microphone</v-icon>
+                  <v-icon
+                    v-else
+                    size="lg"
+                  >mdi-microphone-off</v-icon>
+                </v-btn>
+              </template>
+              <span v-if="publishAudio">Mute microphone</span>
+              <span v-else>Enable microphone</span>
+            </v-tooltip>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  x-large
+                  type="button"
+                  @click="toggleVideo"
+                  v-on="on"
+                >
+                  <v-icon
+                    v-if="publishVideo"
+                    size="lg"
+                  >mdi-video</v-icon>
+                  <v-icon
+                    v-else
+                    size="lg"
+                  >mdi-video-off</v-icon>
+                </v-btn>
+              </template>
+              <span v-if="publishVideo">Hide video</span>
+              <span v-else>Show video</span>
+            </v-tooltip>
             <v-btn
-                x-large
-                type="button"
-                color="green lighten-5"
-                @click="joinSession"
+              x-large
+              type="button"
+              color="green lighten-5"
+              @click="joinSession"
             >
              Join
             </v-btn>
@@ -80,10 +94,10 @@
                   <h2 class="mb-2">Looks like you&apos;re the first one here.</h2>
                   <h3 class="mb-2">The others should be along shortly.</h3>
                   <p>Unless it&apos;s the wrong place? Wrong time?<br />
-                  Not to worry, you can join another room.</p>
+                  Not to worry, you can join another space.</p>
                 </v-card-text>
                 <v-card-actions>
-                  <v-btn to="/">Join a room</v-btn>
+                  <v-btn to="/">Join another space</v-btn>
                 </v-card-actions>
               </v-card>
             </v-col>
@@ -128,19 +142,24 @@
           </v-card>
         </v-slide-item>
         <v-dialog v-model="showInviteDialog" max-width="600px">
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-                color="green"
-                fab
-                dark
-                x-small
-                v-bind="attrs"
-                v-on="on"
-            >
-              <v-icon dark>
-                mdi-plus
-              </v-icon>
-            </v-btn>
+          <template v-slot:activator="{ on: dialog, attrs }">
+            <v-tooltip right>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  color="green"
+                  fab
+                  dark
+                  x-small
+                  v-bind="attrs"
+                  v-on="{ ...dialog, ...on }"
+                >
+                  <v-icon dark>
+                    mdi-plus
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Invite participants</span>
+            </v-tooltip>
           </template>
           <v-card>
             <v-card-title>
@@ -209,63 +228,98 @@
         We are connecting your call
       </v-snackbar>
     </div>
-    <div v-else>
-      <base-spinner />
-      <p>
-        Loading
-      </p>
-    </div>
+    <v-container v-else>
+      <v-row no-gutters style="height: calc(100vh - 256px);">
+        <v-col
+          align-self="center"
+        >
+          <v-card class="pa-md-4  mx-auto" width="400">
+            <v-card-text>
+              <p>Please wait while the space is loading.</p>
+              <v-skeleton-loader type="image" height="32"></v-skeleton-loader>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
     <v-fade-transition>
-      <v-btn-toggle rounded v-show="showCall && visibleButtons" class="buttons">
-        <v-btn
-          type="button"
-          @click="toggleAudio"
-        >
-          <v-icon
-            v-if="publishAudio"
-            size="lg"
-          >mdi-microphone</v-icon>
-          <v-icon
-            v-else
-            size="lg"
-          >mdi-microphone-off</v-icon>
-        </v-btn>
-        <v-btn
-          type="button"
-          @click="toggleVideo"
-        >
-          <v-icon
-            v-if="publishVideo"
-            size="lg"
-          >mdi-video</v-icon>
-          <v-icon
-            v-else
-            size="lg"
-          >mdi-video-off</v-icon>
-        </v-btn>
-        <v-btn
-          type="button"
-          @click="toggleScreen"
-        >
-          <v-icon
-            v-if="!publishScreen"
-            size="lg"
-          >mdi-laptop</v-icon>
-          <v-icon
-            v-else
-            size="lg"
-          >mdi-laptop-off</v-icon>
-        </v-btn>
-        <v-btn
-          type="button"
-          color="red"
-          @click="end"
-        >
-          <v-icon
-            size="lg"
-            color="white"
-          >mdi-phone-hangup</v-icon>
-        </v-btn>
+      <v-btn-toggle rounded v-show="showCall && visibleButtons && !showLandingDialog" class="buttons">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn
+                type="button"
+                @click="toggleAudio"
+                v-on="on"
+              >
+                <v-icon
+                  v-if="publishAudio"
+                  size="lg"
+                >mdi-microphone</v-icon>
+                <v-icon
+                  v-else
+                  size="lg"
+                >mdi-microphone-off</v-icon>
+              </v-btn>
+            </template>
+            <span v-if="publishAudio">Mute microphone</span>
+            <span v-else>Enable microphone</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn
+                type="button"
+                @click="toggleVideo"
+                v-on="on"
+              >
+                <v-icon
+                  v-if="publishVideo"
+                  size="lg"
+                >mdi-video</v-icon>
+                <v-icon
+                  v-else
+                  size="lg"
+                >mdi-video-off</v-icon>
+              </v-btn>
+            </template>
+            <span v-if="publishVideo">Hide video</span>
+            <span v-else>Show video</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn
+                type="button"
+                @click="toggleScreen"
+                v-on="on"
+              >
+                <v-icon
+                  v-if="!publishScreen"
+                  size="lg"
+                >mdi-laptop</v-icon>
+                <v-icon
+                  v-else
+                  size="lg"
+                >mdi-laptop-off</v-icon>
+              </v-btn>
+            </template>
+            <span v-if="publishScreen">Share screen</span>
+            <span v-else>Stop sharing screen</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn
+                type="button"
+                color="red"
+                @click="end"
+                v-on="on"
+              >
+                <v-icon
+                  size="lg"
+                  color="white"
+                >mdi-phone-hangup</v-icon>
+              </v-btn>
+            </template>
+            <span>Leave space</span>
+          </v-tooltip>
       </v-btn-toggle>
     </v-fade-transition>
   </div>
