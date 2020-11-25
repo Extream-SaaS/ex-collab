@@ -17,7 +17,7 @@
             <v-card class="text-center">
               <v-card-title>Join an existing space</v-card-title>
               <v-card-text>
-                <v-btn @click="existingMeeting" text color="green">Enter your space pin</v-btn>
+                <v-btn @click="existingMeeting" color="blue white--text">Enter your space pin</v-btn>
               </v-card-text>
             </v-card>
           </v-col>
@@ -25,7 +25,7 @@
             <v-card class="text-center">
               <v-card-title>Create a new space</v-card-title>
               <v-card-text>
-                <v-btn @click="newMeeting" text color="green">Enter space details</v-btn>
+                <v-btn @click="newMeeting" color="blue white--text">Enter space details</v-btn>
               </v-card-text>
             </v-card>
           </v-col>
@@ -70,6 +70,7 @@
             ></v-combobox>
           </validation-provider>
           <v-btn
+              color="blue white--text"
             class="mr-4"
             type="submit"
             :disabled="invalid || loading"
@@ -102,6 +103,7 @@
             ></v-text-field>
           </validation-provider>
           <v-btn
+              color="blue white--text"
             class="mr-4"
             type="submit"
             :disabled="invalid || loading"

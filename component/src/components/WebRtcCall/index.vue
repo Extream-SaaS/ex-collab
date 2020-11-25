@@ -10,6 +10,7 @@
         <v-card-subtitle class="headline mb-4">
           <span>Welcome</span>
         </v-card-subtitle>
+        <p>Meeting ready</p>
         <v-card-text>
           <v-btn-toggle rounded>
             <v-tooltip bottom>
@@ -57,7 +58,7 @@
             <v-btn
               x-large
               type="button"
-              color="green lighten-5"
+              color="blue lighten-2 white--text"
               @click="joinSession"
             >
              Join
@@ -97,7 +98,7 @@
                   Not to worry, you can join another space.</p>
                 </v-card-text>
                 <v-card-actions>
-                  <v-btn to="/">Join another space</v-btn>
+                  <v-btn color="blue white--text" to="/">Join another space</v-btn>
                 </v-card-actions>
               </v-card>
             </v-col>
@@ -190,16 +191,17 @@
                         type="email"
                     ></v-combobox>
                   </validation-provider>
-                  <v-btn class="mr-4 my-2" @click="closeModal">
-                    Cancel
-                  </v-btn>
                   <v-btn
+                      color="blue white--text"
                       class="mr-4 my-2"
                       type="submit"
                       :disabled="invalid || isSending"
                       :loading="isSending"
                   >
                     send
+                  </v-btn>
+                  <v-btn class="mr-4 my-2" @click="closeModal">
+                    Cancel
                   </v-btn>
                 </v-form>
               </validation-observer>
@@ -331,7 +333,7 @@
             <v-card-text>
             </v-card-text>
             <v-card-actions>
-              <v-btn to="/">Join another space</v-btn>
+              <v-btn color="green--text" to="/">Join another space</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
