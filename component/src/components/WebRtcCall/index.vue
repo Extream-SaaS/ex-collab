@@ -326,7 +326,7 @@
           </template>
           <v-card class="pa-md-4 mx-auto">
             <v-card-title>
-              <span class="headline">You have now left the room.</span>
+              <span class="headline">You have now left the space.</span>
             </v-card-title>
             <v-card-text>
             </v-card-text>
