@@ -98,7 +98,7 @@
                   Not to worry, you can join another space.</p>
                 </v-card-text>
                 <v-card-actions>
-                  <v-btn color="blue white--text" to="/">Join another space</v-btn>
+                  <v-btn color="blue white--text" @click="joinNewSpace">Join another space</v-btn>
                 </v-card-actions>
               </v-card>
             </v-col>
@@ -333,7 +333,7 @@
             <v-card-text>
             </v-card-text>
             <v-card-actions>
-              <v-btn color="green--text" to="/">Join another space</v-btn>
+              <v-btn color="green--text" @click="joinNewSpace">Join another space</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -347,6 +347,7 @@ import { OpenVidu } from 'openvidu-browser'
 import UserVideo from './sub-components/UserVideo'
 import { required, email, max } from 'vee-validate/dist/rules'
 import { extend, ValidationObserver, ValidationProvider } from 'vee-validate'
+import { EventBus } from '@/plugins/event-bus.js'
 
 extend('required', {
   ...required,
@@ -673,6 +674,10 @@ export default {
     closeModal() {
       this.showInviteDialog = false
     },
+    joinNewSpace(){
+      EventBus.$emit('joinNewSpace')
+      this.$router.push(`/`)
+    }
   }
 }
 </script>

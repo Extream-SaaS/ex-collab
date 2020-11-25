@@ -180,6 +180,7 @@
 <script>
   import { required, email, max } from 'vee-validate/dist/rules'
   import { extend, ValidationObserver, ValidationProvider, setInteractionMode } from 'vee-validate'
+  import { EventBus } from '@/plugins/event-bus.js'
 
   setInteractionMode('aggressive')
 
@@ -250,6 +251,9 @@
     mounted() {
       this.showChoice = this.view === 'choice'
       this.userForm = this.view === 'register'
+      EventBus.$on('joinNewSpace', () => {
+        this.showChoice = true
+      })
     },
     methods: {
       joinSubmit() {

@@ -100,6 +100,7 @@
 <script>
 import VLogin from './components/Login'
 import VJoin from './components/Join'
+import { EventBus } from '@/plugins/event-bus.js'
 export default {
   name: 'App',
   components: {
@@ -128,6 +129,9 @@ export default {
   async beforeMount() {
     this.checkModals()
     this.unsplashRandom()
+    EventBus.$on('joinNewSpace', () => {
+      this.joined = false
+    })
   },
   watch: {
     $route(to, from) {
