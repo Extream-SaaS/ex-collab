@@ -85,7 +85,7 @@
           :show-name="false"
           fit="object-cover"
         />
-        <v-container v-else fluid>
+        <v-container v-else-if="!showLandingDialog && !showEndDialog" fluid>
           <v-row no-gutters style="height: calc(100vh - 256px);">
             <v-col
               align-self="center"
