@@ -304,22 +304,37 @@
             <span v-if="publishScreen">Share screen</span>
             <span v-else>Stop sharing screen</span>
           </v-tooltip>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn
-                type="button"
-                color="red"
-                @click="end"
-                v-on="on"
-              >
-                <v-icon
-                  size="lg"
-                  color="white"
-                >mdi-phone-hangup</v-icon>
-              </v-btn>
-            </template>
-            <span>Leave space</span>
-          </v-tooltip>
+        <v-dialog v-model="showEndDialog" max-width="600px">
+          <template v-slot:activator="{ on: dialog, attrs }">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                    type="button"
+                    color="red"
+                    @click="end"
+                    v-bind="attrs"
+                    v-on="{...dialog, ...on}"
+                >
+                  <v-icon
+                      size="lg"
+                      color="white"
+                  >mdi-phone-hangup</v-icon>
+                </v-btn>
+              </template>
+              <span>Leave space</span>
+            </v-tooltip>
+          </template>
+          <v-card class="pa-md-4 mx-auto">
+            <v-card-title>
+              <span class="headline">You have now left the room.</span>
+            </v-card-title>
+            <v-card-text>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn to="/">Join another space</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-btn-toggle>
     </v-fade-transition>
   </div>
@@ -411,6 +426,7 @@ export default {
       addressBook: [],
       isSending: false,
       showLandingDialog: true,
+      showEndDialog: false,
     }
   },
   watch: {
