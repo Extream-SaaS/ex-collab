@@ -17,69 +17,69 @@
         </v-row>
       </v-container>
       <validation-observer
-        v-else-if="register && userInvited"
-        ref="register"
-        v-slot="{ invalid }"
-        :key="'register'"
+          v-else-if="register && userInvited"
+          :key="'register'"
+          ref="register"
+          v-slot="{ invalid }"
       >
         <v-form @submit.prevent="userSubmit">
           <validation-provider
-            v-slot="{ errors }"
-            name="Display name"
-            rules="required"
-            :key="'username'"
+              :key="'username'"
+              v-slot="{ errors }"
+              name="Display name"
+              rules="required"
           >
             <v-text-field
-              v-model="attendee.username"
-              :error-messages="errors"
-              label="Display name"
-              required
+                v-model="attendee.username"
+                :error-messages="errors"
+                label="Display name"
+                required
             ></v-text-field>
           </validation-provider>
           <validation-provider
-            v-slot="{ errors }"
-            name="First name"
-            rules="required"
-            :key="'firstName'"
+              :key="'firstName'"
+              v-slot="{ errors }"
+              name="First name"
+              rules="required"
           >
             <v-text-field
-              v-model="attendee.firstName"
-              :error-messages="errors"
-              label="First name"
-              required
+                v-model="attendee.firstName"
+                :error-messages="errors"
+                label="First name"
+                required
             ></v-text-field>
           </validation-provider>
           <validation-provider
-            v-slot="{ errors }"
-            name="Last name"
-            rules="required"
-            :key="'lastName'"
+              :key="'lastName'"
+              v-slot="{ errors }"
+              name="Last name"
+              rules="required"
           >
             <v-text-field
-              v-model="attendee.lastName"
-              :error-messages="errors"
-              label="Last name"
-              required
+                v-model="attendee.lastName"
+                :error-messages="errors"
+                label="Last name"
+                required
             ></v-text-field>
           </validation-provider>
           <validation-provider
-            v-slot="{ errors }"
-            name="Email"
-            rules="required|email"
-            :key="'email'"
+              :key="'email'"
+              v-slot="{ errors }"
+              name="Email"
+              rules="required|email"
           >
             <v-text-field
-              v-model="attendee.email"
-              :error-messages="errors"
-              label="Email"
-              required
+                v-model="attendee.email"
+                :error-messages="errors"
+                label="Email"
+                required
             ></v-text-field>
           </validation-provider>
           <v-btn
-            class="mr-4"
-            type="submit"
-            :disabled="invalid || loading"
-            :loading="loading"
+              :disabled="invalid || loading"
+              :loading="loading"
+              class="mr-4"
+              type="submit"
           >
             submit
           </v-btn>
@@ -88,34 +88,35 @@
       <v-container v-else-if="userNotFound">
         <v-row dense>
           <v-col>
-            <p>Unfortunately this service is by invitation only.<br />Please follow an invitation link to join.</p>
+            <p>Unfortunately this service is by invitation only.<br/>Please follow an invitation link to join.</p>
           </v-col>
         </v-row>
       </v-container>
       <validation-observer
-        v-else
-        ref="login"
-        v-slot="{ invalid }"
-        :key="'login'"
+          v-else
+          :key="'login'"
+          ref="login"
+          v-slot="{ invalid }"
       >
         <v-form @submit.prevent="submit">
           <validation-provider
-            v-slot="{ errors }"
-            name="Email"
-            rules="required|email"
+              v-slot="{ errors }"
+              name="Email"
+              rules="required|email"
           >
             <v-text-field
-              v-model="email"
-              :error-messages="errors"
-              label="Email"
-              required
+                v-model="email"
+                :error-messages="errors"
+                label="Email"
+                required
             ></v-text-field>
           </validation-provider>
           <v-btn
-            class="mr-4"
-            type="submit"
-            :disabled="invalid || loading"
-            :loading="loading"
+              :disabled="invalid || loading"
+              :loading="loading"
+              class="mr-4"
+              color="blue white--text"
+              type="submit"
           >
             submit
           </v-btn>
@@ -125,104 +126,104 @@
   </v-card>
 </template>
 <script>
-  import { required, email, max } from 'vee-validate/dist/rules'
-  import { extend, ValidationObserver, ValidationProvider, setInteractionMode } from 'vee-validate'
+import {required, email, max} from 'vee-validate/dist/rules'
+import {extend, ValidationObserver, ValidationProvider, setInteractionMode} from 'vee-validate'
 
-  setInteractionMode('aggressive')
+setInteractionMode('aggressive')
 
-  extend('required', {
-    ...required,
-    message: '{_field_} can not be empty',
-  })
+extend('required', {
+  ...required,
+  message: '{_field_} can not be empty',
+})
 
-  extend('max', {
-    ...max,
-    message: '{_field_} may not be greater than {length} characters',
-  })
+extend('max', {
+  ...max,
+  message: '{_field_} may not be greater than {length} characters',
+})
 
-  extend('email', {
-    ...email,
-    message: 'Email must be valid',
-  })
+extend('email', {
+  ...email,
+  message: 'Email must be valid',
+})
 
-  export default {
-    name: 'VLogin',
-    components: {
-      ValidationProvider,
-      ValidationObserver,
+export default {
+  name: 'VLogin',
+  components: {
+    ValidationProvider,
+    ValidationObserver,
+  },
+  props: {
+    loading: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
-    props: {
-      loading: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-      register: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-      userInvited: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-      userNotFound: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-      invitedId: {
-        type: String,
-        required: false,
-        default: '',
-      },
-      regError: {
-        type: String,
-        required: false,
-        default: '',
-      },
-      loginError: {
-        type: String,
-        required: false,
-        default: '',
-      },
+    register: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
-    data: () => ({
-      valid: true,
+    userInvited: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    userNotFound: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    invitedId: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    regError: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    loginError: {
+      type: String,
+      required: false,
+      default: '',
+    },
+  },
+  data: () => ({
+    valid: true,
+    email: '',
+    attendee: {
+      id: '',
+      username: '',
+      firstName: '',
+      lastName: '',
       email: '',
-      attendee: {
-        id: '',
-        username: '',
-        firstName: '',
-        lastName: '',
-        email: '',
+    }
+  }),
+  computed: {
+    action() {
+      return this.userInvited && this.register ? 'Enter your details' : this.userNotFound ? 'Invitational access only' : 'Login'
+    },
+  },
+  watch: {
+    invitedId(newVal, oldVal) {
+      if (newVal !== '' && newVal !== oldVal) {
+        this.attendee.id = newVal
       }
-    }),
-    computed: {
-      action() {
-        return this.userInvited && this.register ? 'Enter your details' : this.userNotFound ? 'Invitational access only' : 'Login'
-      },
+    }
+  },
+  methods: {
+    submit() {
+      this.$refs.login.validate()
+      this.$emit('login', {
+        username: this.email
+      })
+      this.attendee.email = this.email
     },
-    watch: {
-      invitedId(newVal, oldVal) {
-        if (newVal !== '' && newVal !== oldVal) {
-          this.attendee.id = newVal
-        }
-      }
+    userSubmit() {
+      this.$refs.register.validate()
+      this.$emit('register', this.attendee)
     },
-    methods: {
-      submit () {
-        this.$refs.login.validate()
-        this.$emit('login', {
-          username: this.email
-        })
-        this.attendee.email = this.email
-      },
-      userSubmit() {
-        this.$refs.register.validate()
-        this.$emit('register', this.attendee)
-      },
-    },
-  }
+  },
+}
 </script>
