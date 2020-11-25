@@ -10,7 +10,7 @@
         <v-card-subtitle class="headline mb-4">
           <span>Welcome</span>
         </v-card-subtitle>
-        <p>Press JOIN when you are ready to join the space. You can mute your microphone or hide your camera in advance.</p>
+        <p>Press JOIN when you are ready to join the space.<br />You can mute your microphone or hide your camera in advance.</p>
         <v-card-text>
           <v-btn-toggle rounded>
             <v-tooltip bottom>
@@ -58,7 +58,7 @@
             <v-btn
               x-large
               type="button"
-              color="blue lighten-2 white--text"
+              color="blue white--text"
               @click="joinSession"
             >
              Join
@@ -306,7 +306,7 @@
             <span v-if="!publishScreen">Share screen</span>
             <span v-else>Stop sharing screen</span>
           </v-tooltip>
-        <v-dialog v-model="showEndDialog" max-width="600px">
+        <v-dialog v-model="showEndDialog" persistent max-width="600px">
           <template v-slot:activator="{ on: dialog, attrs }">
             <v-tooltip bottom>
               <template v-slot:activator="{ on }">

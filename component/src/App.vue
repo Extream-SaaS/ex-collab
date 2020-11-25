@@ -256,7 +256,7 @@ export default {
       this.joinLoading = true
       console.log('register attendee', fields)
       try {
-        await this.$extream.user.completeUser(fields.id, {
+        const payload = {
           firstName: fields.firstName,
           lastName: fields.lastName,
           email: fields.email.toLowerCase(),
@@ -264,8 +264,10 @@ export default {
           user_type: 'audience',
           user: { displayName: fields.username },
           password: Date.now(),
-        })
-        this.login(fields.email.toLowerCase())
+        }
+        await this.$extream.user.completeUser(fields.id, payload)
+        console.log('user registered')
+        this.login(payload)
       } catch (error) {
         const resp = await error.json()
         if (resp.message === 'user not found') {
