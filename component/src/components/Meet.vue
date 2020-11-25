@@ -2,7 +2,7 @@
   <v-container fluid>
     <div v-if="connected" class="fullscreen" @mousemove="showActionBar">
       <v-fade-transition>
-        <v-banner class="banner white--text" single-line v-show="visibleButtons">{{ meeting.subject }}</v-banner>
+        <div class="banner white--text" single-line v-show="visibleButtons">{{ meeting.subject }}</div>
       </v-fade-transition>
       <web-rtc-call
         collab-url="https://collab.extream.app"
@@ -132,14 +132,18 @@ export default {
   position: absolute !important;
   z-index: 6;
   width: 100vw;
-  text-align: center;
+  padding-top: 10px;
+  padding-left: 10px;
+  font-size: 20px;
+  text-align: left;
+  text-shadow: 0px 1px 5px #000000;
 }
 .fullscreen {
   position: fixed;
   left: 0;
-  top: 0;
+  top: 64px;
   width: 100vw;
-  height: 100vh;
+  height: calc(100vh - 64px);
   z-index: 5;
 }
 </style>

@@ -301,7 +301,7 @@
                 >mdi-laptop-off</v-icon>
               </v-btn>
             </template>
-            <span v-if="publishScreen">Share screen</span>
+            <span v-if="!publishScreen">Share screen</span>
             <span v-else>Stop sharing screen</span>
           </v-tooltip>
           <v-tooltip bottom>

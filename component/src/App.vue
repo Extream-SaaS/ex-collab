@@ -57,7 +57,7 @@
     <v-dialog :value="(!loggedIn || loggedIn === 'false') && !roomId && !joined" persistent :width="width">
       <v-login @login="login" :login-error="loginError" :user-not-found="userNotFound" :loading="loggingIn" />
     </v-dialog>
-    <v-dialog :value="loggedIn !== 'false' && !roomId && !joined && !authCheck" persistent :width="width">
+    <v-dialog :value="loggedIn && !roomId && !joined && !authCheck" persistent :width="width">
       <v-join
         @choice="choice"
         @create="create"
@@ -67,11 +67,11 @@
         :loading="joinLoading"
       />
     </v-dialog>
-    <v-dialog :value="!loggedIn && roomId && !joined && !authCheck" persistent :width="width">
+    <v-dialog :value="(!loggedIn || loggedIn === 'false') && roomId && !joined && !authCheck" persistent :width="width">
       <v-login @login="login" @register="register" :login-error="loginError" :reg-error="regError" :user-invited="userInvited" :invited-id="invitedId" :user-not-found="userNotFound" :register="true" :loading="loggingIn" />
     </v-dialog>
     <v-footer
-      v-if="!loggedIn && !roomId && !joined"
+      v-if="unsplash && (!loggedIn || loggedIn === 'false') && !roomId && !joined"
       padless
       absolute
       :elevation="4"
