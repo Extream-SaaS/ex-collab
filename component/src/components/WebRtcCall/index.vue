@@ -141,7 +141,7 @@
             />
           </v-card>
         </v-slide-item>
-        <v-dialog v-if="this.session" v-model="showInviteDialog" max-width="600px">
+        <v-dialog v-if="this.session && this.session!== 'undefined'" v-model="showInviteDialog" max-width="600px">
           <template v-slot:activator="{ on: dialog, attrs }">
             <v-tooltip right>
               <template v-slot:activator="{ on }">
