@@ -10,7 +10,7 @@
         <v-card-subtitle class="headline mb-4">
           <span>Welcome</span>
         </v-card-subtitle>
-        <p>Meeting ready</p>
+        <p>Press JOIN when you are ready to join the space. You can mute your microphone or hide your camera in advance.</p>
         <v-card-text>
           <v-btn-toggle rounded>
             <v-tooltip bottom>
