@@ -363,6 +363,31 @@ extend('email', {
   ...email,
   message: 'Email must be valid',
 })
+
+class WebRtc {
+  constructor () {
+    this.OV = undefined
+    this.session = undefined
+    this.mainStreamManager = undefined
+    this.publisher = undefined
+    this.publishVideo = true
+    this.publishAudio = true
+    this.publishScreen = false
+    this.subscribers = []
+    this.currentSpeaker = undefined
+    this.currentSharer = undefined
+    this.user = undefined
+  }
+
+  joinSession() {}
+  leaveSession() {}
+  toggleVideo() {}
+  toggleAudio() {}
+  toggleScreen() {}
+  getToken() {}
+  verifyUser() {}
+}
+
 export default {
   name: 'WebRtcCall',
   components: {
@@ -419,7 +444,9 @@ export default {
       currentSpeaker: undefined,
       currentSharer: undefined,
       user: undefined,
+
       showCall: true,
+
       exSession: JSON.parse(localStorage.getItem('session')),
       exUser: JSON.parse(localStorage.getItem('user')),
       showInviteDialog: false,
@@ -622,10 +649,6 @@ export default {
       this.subscribers = []
       this.OV = undefined
       window.removeEventListener('beforeunload', this.leaveSession)
-    },
-    updateMainVideoStreamManager (stream) {
-      if (this.mainStreamManager === stream) return
-      this.mainStreamManager = stream
     },
     async verifyUser (token) {
       const resp = await fetch(`${this.collabUrl}/auth/verify`, {
