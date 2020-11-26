@@ -36,6 +36,7 @@ Vue.use(SublimePlugin, {
   auth: 'https://auth.extream.app',
   gateway: 'https://gateway.extream.app',
   // gateway: 'http://localhost:8880',
+  collab: 'https://collab.extream.app',
   apiKey: 'MDM2ODI0MzctYmZhMi00NGUxLTg5NzMtYzc1NDU5NTA0OGQ2Ojg5MmIwOTUzMmI5ZjdkNTNiZDY1MmFlNTZkZTdlMzFmMGFhMTQ2OTFkZjgzN2RiOQ=='
 })
 

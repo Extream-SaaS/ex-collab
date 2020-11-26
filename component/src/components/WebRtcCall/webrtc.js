@@ -1,3 +1,5 @@
+import { OpenVidu } from 'openvidu-browser'
+
 export default class WebRtc {
     constructor (collabUrl, accessToken, exUser, itemId) {
       this.collabUrl = collabUrl
