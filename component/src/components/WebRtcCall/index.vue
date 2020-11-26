@@ -127,15 +127,15 @@
             <user-video
               :stream-manager="sub"
               :class="[
-                currentSpeaker === sub.stream.streamId
+                rtc.currentSpeaker === sub.stream.streamId
                   ? 'border-black'
                   : 'border-white',
-                currentSharer === sub.stream.streamId
+                rtc.currentSharer === sub.stream.streamId
                   ? 'absolute w-full z-10 left-0'
                   : 'relative',
               ]"
               :fit="
-                currentSharer === sub.stream.streamId
+                rtc.currentSharer === sub.stream.streamId
                   ? 'object-contain'
                   : 'object-cover'
               "
