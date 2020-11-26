@@ -1,12 +1,12 @@
 import { OpenVidu } from 'openvidu-browser'
 
 export default class WebRtc {
-    constructor (collabUrl, accessToken, exUser, itemId) {
-      this.collabUrl = collabUrl
-      this.exUser = exUser
+    constructor (extreamClient, accessToken, itemId) {
+      this.extreamClient = extreamClient
       this.itemId = itemId
+      // TODO get this from SDK rather than passing it in
       this.accessToken = accessToken
-  
+
       this.OV = undefined
       this.session = undefined
       this.mainStreamManager = undefined
@@ -19,7 +19,6 @@ export default class WebRtc {
       this.currentSharer = undefined
       this.user = undefined
     }
-  
     async joinSession() {
             // --- Get an OpenVidu object ---
         this.OV = new OpenVidu()
@@ -67,7 +66,7 @@ export default class WebRtc {
         try {
           const resp = await this.getToken(this.itemId)
           const token = resp[0]
-          await this.session.connect(token, { clientData: this.exUser.fields.displayName || this.exUser.firstName || this.exUser.email })
+          await this.session.connect(token, { clientData: this.extreamClient.currentUser.fields.displayName || this.extreamClient.currentUser.firstName || this.extreamClient.currentUser.email })
           // --- Get your own camera stream with the desired properties ---
           const publisher = this.OV.initPublisher(undefined, {
             audioSource: undefined, // The source of audio. If undefined default microphone
@@ -164,7 +163,7 @@ export default class WebRtc {
     async getToken(sessionName) {
       console.log('session name', sessionName)
       const resp = await fetch(
-        `${this.collabUrl}/sessions/token`,
+        `${this.extreamClient.options.collab}/sessions/token`,
         {
           method: 'POST',
           body: `sessionName=${sessionName}`,
@@ -178,7 +177,7 @@ export default class WebRtc {
     }
     
     async verifyUser() {
-      const resp = await fetch(`${this.collabUrl}/auth/verify`, {
+      const resp = await fetch(`${this.extreamClient.options.collab}/auth/verify`, {
         headers: {
           Authorization: `Bearer ${this.accessToken}`
         }

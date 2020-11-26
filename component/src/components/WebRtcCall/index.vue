@@ -345,7 +345,6 @@
 <script>
 import Vue from 'vue'
 import WebRtc from './webrtc'
-import { OpenVidu } from 'openvidu-browser'
 import UserVideo from './sub-components/UserVideo'
 import { required, email, max } from 'vee-validate/dist/rules'
 import { extend, ValidationObserver, ValidationProvider } from 'vee-validate'
@@ -412,7 +411,7 @@ export default {
   data () {
     const exSession = JSON.parse(localStorage.getItem('session'))
     const exUser = JSON.parse(localStorage.getItem('user'))
-    const rtc = new WebRtc(this.collabUrl, exSession.accessToken, exUser, this.itemId)
+    const rtc = new WebRtc(this.$extream, exSession.accessToken, this.itemId)
     return {
       rtc: Vue.observable(rtc),
       showCall: true,
