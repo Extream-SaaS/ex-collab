@@ -18,7 +18,7 @@
                 <v-btn
                   x-large
                   type="button"
-                  @click="rtc.toggleAudio"
+                  @click="() => rtc.toggleAudio()"
                   v-on="on"
                 >
                   <v-icon
@@ -39,7 +39,7 @@
                 <v-btn
                   x-large
                   type="button"
-                  @click="rtc.toggleVideo"
+                  @click="() => rtc.toggleVideo()"
                   v-on="on"
                 >
                   <v-icon
@@ -250,7 +250,7 @@
             <template v-slot:activator="{ on }">
               <v-btn
                 type="button"
-                @click="rtc.toggleAudio"
+                @click="() => rtc.toggleAudio()"
                 v-on="on"
               >
                 <v-icon
@@ -270,7 +270,7 @@
             <template v-slot:activator="{ on }">
               <v-btn
                 type="button"
-                @click="rtc.toggleVideo"
+                @click="() => rtc.toggleVideo()"
                 v-on="on"
               >
                 <v-icon
@@ -290,7 +290,7 @@
             <template v-slot:activator="{ on }">
               <v-btn
                 type="button"
-                @click="rtc.toggleScreen"
+                @click="() => rtc.toggleScreen()"
                 v-on="on"
               >
                 <v-icon
@@ -333,7 +333,7 @@
             <v-card-text>
             </v-card-text>
             <v-card-actions>
-              <v-btn color="green--text" @click="rtc.joinNewSpace">Join another space</v-btn>
+              <v-btn color="green--text" @click="() => rtc.joinNewSpace()">Join another space</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
