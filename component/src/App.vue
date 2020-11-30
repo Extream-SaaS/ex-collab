@@ -115,7 +115,7 @@ export default {
     items: [
 			{ title: 'Logout', link: '/logout' },
     ],
-    loggedIn: localStorage.getItem('isAuthenticated'),
+    loggedIn: false,
     roomId: null,
     joinLoading: false,
     joinAction: '',
@@ -127,6 +127,12 @@ export default {
     unsplash: null,
   }),
   async beforeMount() {
+    try {
+      this.$extream.silentAuthenticate()
+      this.loggingIn = true
+    } catch {
+      this.loggingIn = false
+    }
     this.checkModals()
     this.unsplashRandom()
     EventBus.$on('joinNewSpace', () => {
