@@ -9,6 +9,7 @@ import VueBlurHash from 'vue-blurhash'
 import 'vue-blurhash/dist/vue-blurhash.css'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import '@mdi/font/css/materialdesignicons.css'
+import { PersistanceType } from '@sublime-productions/extream-sdk'
 
 Vue.config.productionTip = false
 const routes = [
@@ -37,7 +38,8 @@ Vue.use(SublimePlugin, {
   gateway: 'https://gateway.extream.app',
   // gateway: 'http://localhost:8880',
   collab: 'https://collab.extream.app',
-  apiKey: 'MDM2ODI0MzctYmZhMi00NGUxLTg5NzMtYzc1NDU5NTA0OGQ2Ojg5MmIwOTUzMmI5ZjdkNTNiZDY1MmFlNTZkZTdlMzFmMGFhMTQ2OTFkZjgzN2RiOQ=='
+  apiKey: 'MDM2ODI0MzctYmZhMi00NGUxLTg5NzMtYzc1NDU5NTA0OGQ2Ojg5MmIwOTUzMmI5ZjdkNTNiZDY1MmFlNTZkZTdlMzFmMGFhMTQ2OTFkZjgzN2RiOQ==',
+  persistence: PersistanceType.Cookie
 })
 
 Vue.prototype.$extreamData = {
