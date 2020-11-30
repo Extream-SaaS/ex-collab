@@ -411,7 +411,7 @@ export default {
   data () {
     const exSession = JSON.parse(localStorage.getItem('session'))
     const exUser = JSON.parse(localStorage.getItem('user'))
-    const rtc = new WebRtc(this.$extream, exSession.accessToken, this.itemId)
+    const rtc = new WebRtc(this.$extream, this.itemId)
     return {
       rtc: Vue.observable(rtc),
       showCall: true,

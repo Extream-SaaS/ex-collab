@@ -1,11 +1,10 @@
 import { OpenVidu } from 'openvidu-browser'
 
 export default class WebRtc {
-    constructor (extreamClient, accessToken, itemId) {
+    constructor (extreamClient, itemId) {
       this.extreamClient = extreamClient
       this.itemId = itemId
-      // TODO get this from SDK rather than passing it in
-      this.accessToken = accessToken
+      this.accessToken = extreamClient.accessToken
 
       this.OV = undefined
       this.session = undefined
