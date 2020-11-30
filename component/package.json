@@ -18,6 +18,7 @@
     "vee-validate": "^3.4.5",
     "vue": "2.6.11",
     "vue-blurhash": "^0.1.2",
+    "vue-matomo": "^3.14.0-0",
     "vue-router": "^3.4.9",
     "vuetify": "^2.2.11"
   },

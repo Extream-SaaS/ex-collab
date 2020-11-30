@@ -6,6 +6,7 @@ import App from './App'
 import SublimePlugin from './plugins/component-lib'
 import vuetify from './plugins/vuetify';
 import VueBlurHash from 'vue-blurhash'
+import VueMatomo from 'vue-matomo'
 import 'vue-blurhash/dist/vue-blurhash.css'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import '@mdi/font/css/materialdesignicons.css'
@@ -37,6 +38,12 @@ Vue.use(SublimePlugin, {
   gateway: 'https://gateway.extream.app',
   // gateway: 'http://localhost:8880',
   apiKey: 'MDM2ODI0MzctYmZhMi00NGUxLTg5NzMtYzc1NDU5NTA0OGQ2Ojg5MmIwOTUzMmI5ZjdkNTNiZDY1MmFlNTZkZTdlMzFmMGFhMTQ2OTFkZjgzN2RiOQ=='
+})
+
+Vue.use(VueMatomo, {
+  host: 'https://stats.x-smg.com/matomo',
+  siteId: 6,
+  router,
 })
 
 Vue.prototype.$extreamData = {

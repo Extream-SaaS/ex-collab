@@ -169,6 +169,7 @@ export default {
         try {
           const user = await this.$extream.connect(accessToken)
           localStorage.setItem('user', JSON.stringify(user))
+          this.$matomo.setUserId(user.id)
         } catch (error) {
           this.loggedIn = false
           localStorage.setItem('isAuthenticated', false)
@@ -203,6 +204,7 @@ export default {
           refreshTokenExpiresAt,
         }))
         localStorage.setItem('user', JSON.stringify(authUser))
+        this.$matomo.setUserId(authUser.id)
         this.loggingIn = false
         this.connected = true
         this.loggedIn = true
