@@ -185,24 +185,14 @@ export default {
       this.loggingIn = true
       try {
         const { password, username } = await this.$extream.user.fetchUser(encodeURIComponent(user.username.toLowerCase()))
-        const {
-          id,
-          accessToken,
-          accessTokenExpiresAt,
-          refreshToken,
-          refreshTokenExpiresAt
-        } = await this.$extream.user.login(encodeURIComponent(username.toLowerCase()), encodeURIComponent(password), this.$extreamData.eventId)
-        this.token = accessToken
-        const authUser = await this.$extream.connect(accessToken)
+        await this.$extream.authenticate(encodeURIComponent(username.toLowerCase()), encodeURIComponent(password), this.$extreamData.eventId)
+        this.token = this.$extream.accessToken
         localStorage.setItem('isAuthenticated', true)
         localStorage.setItem('session', JSON.stringify({
-          id,
-          accessToken,
-          accessTokenExpiresAt,
-          refreshToken,
-          refreshTokenExpiresAt,
+          id: this.$extream.currentUser.id,
+          accessToken: this.token,
         }))
-        localStorage.setItem('user', JSON.stringify(authUser))
+        localStorage.setItem('user', JSON.stringify(this.$extream.currentUser))
         this.loggingIn = false
         this.connected = true
         this.loggedIn = true
