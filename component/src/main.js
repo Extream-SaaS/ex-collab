@@ -39,7 +39,7 @@ Vue.use(SublimePlugin, {
   // gateway: 'http://localhost:8880',
   collab: 'https://collab.extream.app',
   apiKey: 'MDM2ODI0MzctYmZhMi00NGUxLTg5NzMtYzc1NDU5NTA0OGQ2Ojg5MmIwOTUzMmI5ZjdkNTNiZDY1MmFlNTZkZTdlMzFmMGFhMTQ2OTFkZjgzN2RiOQ==',
-  persistence: PersistanceType.Cookie
+  persistance: PersistanceType.Cookie
 })
 
 Vue.prototype.$extreamData = {
