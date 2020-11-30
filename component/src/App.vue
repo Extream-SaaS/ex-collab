@@ -88,9 +88,9 @@
         <v-card-text class="text-center">
           <span>&copy; Extream Ltd. {{ new Date().getFullYear() }}</span>
           <v-spacer></v-spacer>
-          <span>Photo by <v-btn small :href="unsplash.user.links.html" target="_blank">
+          <span>Photo by <v-btn small :href="`${unsplash.user.links.html}?utm_source=Extream+Collaboration&utm_medium=referral`" target="_blank">
             {{ unsplash.user.name }}
-          </v-btn> on <v-btn small href="https://unsplash.com" target="_blank">Unsplash</v-btn></span>
+          </v-btn> on <v-btn small href="https://unsplash.com?utm_source=Extream+Collaboration&utm_medium=referral" target="_blank">Unsplash</v-btn></span>
         </v-card-text>
       </v-card>
     </v-footer>
