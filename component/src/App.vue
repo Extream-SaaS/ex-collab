@@ -88,9 +88,9 @@
         <v-card-text class="text-center">
           <span>&copy; Extream Ltd. {{ new Date().getFullYear() }}</span>
           <v-spacer></v-spacer>
-          <span>Photo by <v-btn small :href="unsplash.user.links.html" target="_blank">
+          <span>Photo by <v-btn small :href="`${unsplash.user.links.html}?utm_source=Extream+Collaboration&utm_medium=referral`" target="_blank">
             {{ unsplash.user.name }}
-          </v-btn> on <v-btn small href="https://unsplash.com" target="_blank">Unsplash</v-btn></span>
+          </v-btn> on <v-btn small href="https://unsplash.com?utm_source=Extream+Collaboration&utm_medium=referral" target="_blank">Unsplash</v-btn></span>
         </v-card-text>
       </v-card>
     </v-footer>
@@ -169,6 +169,7 @@ export default {
         try {
           const user = await this.$extream.connect(accessToken)
           localStorage.setItem('user', JSON.stringify(user))
+          this.$matomo.setUserId(user.id)
         } catch (error) {
           this.loggedIn = false
           localStorage.setItem('isAuthenticated', false)
@@ -193,6 +194,7 @@ export default {
           accessToken: this.token,
         }))
         localStorage.setItem('user', JSON.stringify(this.$extream.currentUser))
+        this.$matomo.setUserId(authUser.id)
         this.loggingIn = false
         this.connected = true
         this.loggedIn = true
@@ -246,7 +248,7 @@ export default {
       this.joinLoading = true
       console.log('register attendee', fields)
       try {
-        await this.$extream.user.completeUser(fields.id, {
+        const payload = {
           firstName: fields.firstName,
           lastName: fields.lastName,
           email: fields.email.toLowerCase(),
@@ -254,8 +256,10 @@ export default {
           user_type: 'audience',
           user: { displayName: fields.username },
           password: Date.now(),
-        })
-        this.login(fields.email.toLowerCase())
+        }
+        await this.$extream.user.completeUser(fields.id, payload)
+        console.log('user registered')
+        this.login(payload)
       } catch (error) {
         const resp = await error.json()
         if (resp.message === 'user not found') {
