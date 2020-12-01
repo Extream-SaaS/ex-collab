@@ -194,7 +194,7 @@ export default {
           accessToken: this.token,
         }))
         localStorage.setItem('user', JSON.stringify(this.$extream.currentUser))
-        this.$matomo.setUserId(authUser.id)
+        this.$matomo.setUserId(this.$extream.currentUser.id)
         this.loggingIn = false
         this.connected = true
         this.loggedIn = true

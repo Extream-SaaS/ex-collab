@@ -333,7 +333,7 @@
             <v-card-text>
             </v-card-text>
             <v-card-actions>
-              <v-btn color="green--text" @click="() => rtc.joinNewSpace()">Join another space</v-btn>
+              <v-btn color="blue white--text" @click="joinNewSpace">Join another space</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
