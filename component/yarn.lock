@@ -969,20 +969,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.10.1.tgz#cc323bad8e8a533d4822f45ce4e5326f36e42177"
   integrity sha512-aYNbO+FZ/3KGeQCEkNhHFRIzBOUgc7QvcVNKXbfnhDkSfwUv91JsQQa10rDgKSTSLkXZ1UIyPe4FJJNVgw1xWQ==
 
-"@types/node@14.14.7":
-  version "14.14.7"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.7.tgz#8ea1e8f8eae2430cf440564b98c6dfce1ec5945d"
-  integrity sha512-Zw1vhUSQZYw+7u5dAwNbIA9TuTotpzY/OF7sJM9FqPOF3SPjKnxrjoTktXDZgUjybf4cWVBP7O8wvKdSaGHweg==
-
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.0.tgz#e486d0d97396d79beedd0a6e33f4534ff6b4973e"
   integrity sha512-f5j5b/Gf71L+dbqxIpQ4Z2WlmI/mPJ0fOkGGmFgtb6sAu97EPczzbS3/tJKxmcYDj55OX6ssqwDAWOHIYDRDGA==
-
-"@types/platform@1.3.3":
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/@types/platform/-/platform-1.3.3.tgz#a3d23941770d320e2c4312516a442ab35210d019"
-  integrity sha512-1fuOulBHWIxAPLBtLms+UtbeRDt6rL7gP5R+Yugfzdg+poCLxXqXTE8i+FpYeiytGRLUEtnFkjsY/j+usbQBqw==
 
 "@types/q@^1.5.1":
   version "1.5.4"
@@ -5889,13 +5879,11 @@ opener@^1.5.1:
   resolved "https://registry.yarnpkg.com/opener/-/opener-1.5.2.tgz#5d37e1f35077b9dcac4301372271afdeb2a13598"
   integrity sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==
 
-openvidu-browser@2.16.0:
-  version "2.16.0"
-  resolved "https://registry.yarnpkg.com/openvidu-browser/-/openvidu-browser-2.16.0.tgz#db2b6343618498fcf821417a0f52e31a481037ae"
-  integrity sha512-o7TWCKhEKPYYuDpYhL1u2OMvZVhzj6Kef8iD64QOTO3q3Wq6jpDGpM6J9ZxfqjE9owyJWQkDL6jdzq4tEiiQvw==
+openvidu-browser@^2.16.2:
+  version "2.16.2"
+  resolved "https://registry.yarnpkg.com/openvidu-browser/-/openvidu-browser-2.16.2.tgz#95b72f2ddff2e57b1d63e756f74785137b266fc8"
+  integrity sha512-rdiF6X42FJCbIj3DDICJPfqiTP1KtXAG8kkXQqp/M98qLMnxdjFlTlRkXl+HolwD6KRHBxiSWPhbKDh0zRiEcw==
   dependencies:
-    "@types/node" "14.14.7"
-    "@types/platform" "1.3.3"
     freeice "2.2.2"
     hark "1.2.3"
     platform "1.3.6"
@@ -8307,6 +8295,11 @@ vue-loader@^15.9.2:
     loader-utils "^1.1.0"
     vue-hot-reload-api "^2.3.0"
     vue-style-loader "^4.1.0"
+
+vue-matomo@^3.14.0-0:
+  version "3.14.0-0"
+  resolved "https://registry.yarnpkg.com/vue-matomo/-/vue-matomo-3.14.0-0.tgz#f8e668c26ec1f2f7b4498f758edfb7c387259735"
+  integrity sha512-i1IkZGSXNY84zg1gVU8TOuaqajYDWQYl4Vs7M1mEb21cNhlMZKUxxgElvj+xmv7ytYUc/6ekZbxIS+y6W4qTMQ==
 
 vue-router@^3.4.9:
   version "3.4.9"
