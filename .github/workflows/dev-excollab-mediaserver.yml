@@ -34,7 +34,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: extreamio/excollab-mediaserver:dev-$GITHUB_SHA
+          tags: extreamio/excollab-mediaserver:dev-${{ GITHUB_SHA }}
 
       - uses: act10ns/slack@v1
         env:
