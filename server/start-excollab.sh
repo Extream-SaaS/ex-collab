@@ -8,5 +8,6 @@ cd /home/owt
 # bash ./bin/start-all.sh
 
 # per server type startup commands here
+bash ./bin/start-all.sh
 
 sleep infinity
