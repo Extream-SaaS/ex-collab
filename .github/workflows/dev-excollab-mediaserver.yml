@@ -15,7 +15,12 @@ jobs:
       run:
         working-directory: server
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Show dir
+        run: pwd
+      - name: List dir
+        run: ls .
       -
         name: Docker meta
         id: docker_meta
