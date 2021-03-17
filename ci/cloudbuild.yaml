@@ -1,5 +1,5 @@
 steps:
-- name: 'mediaserver-build'
+- name: 'docker'
   id: 'Build and Push'
   entrypoint: 'sh'
   args:
