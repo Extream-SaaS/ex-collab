@@ -2,9 +2,9 @@ name: dev-excollab-mediaserver
 
 on:
   push:
-    # paths:
-    #   - 'server/*'
-    branches: [ dev ]
+    paths:
+      - 'server/*'
+    branches: [ dev_1 ]
 
 jobs:
   build:

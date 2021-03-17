@@ -231,6 +231,7 @@ RUN sed -i 's/hostname = \"\" #default: \"\"/hostname = \"dev.collab.extream.app
 # RUN sed -i 's/ssl = true/ssl = false/g' /home/owt/management_console/management_console.toml
 
 COPY start-excollab.sh /home/
-RUN /bin/bash /home/owt/bin/init-all.sh --deps
-CMD /bin/bash /home/owt/bin/start-all.sh
+# RUN /bin/bash /home/owt/bin/init-all.sh --deps
+# CMD /bin/bash /home/owt/bin/start-all.sh
+CMD /bin/bash
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib/x86_64-linux-gnu
