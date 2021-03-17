@@ -26,3 +26,4 @@ steps:
       compute ssh dev-excollab-mediaserver --command tar -zxvf /home/owt/releases/$SHORT_SHA.tar.gz ./ && rm /opt/owt && ln -s /home/owt/releases/$SHORT_SHA /opt/owt && \
       compute ssh dev-excollab-mediaserver --command rm -rf /opt/owt/management_api/cert/certificate.pfx && cp /opt/owt-cert/certificate.pfx /opt/owt/management_api/cert && rm -rf /opt/owt/management_console/cert/certificate.pfx && cp /opt/owt-cert/certificate.pfx /opt/owt/management_console/cert && rm -rf /opt/owt/webrtc_agent/cert/certificate.pfx && cp /opt/owt-cert/certificate.pfx /opt/owt/webrtc_agent/cert && rm -rf /opt/owt/portal/cert/certificate.pfx && cp /opt/owt-cert/certificate.pfx /opt/owt/portal/cert && \
       compute ssh dev-excollab-mediaserver --command /opt/owt/bin/init-all.sh --deps && /opt/owt/bin/start-all.sh
+timeout: 7200s
