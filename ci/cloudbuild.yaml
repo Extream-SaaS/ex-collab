@@ -10,7 +10,7 @@ steps:
       docker build -f server/Dockerfile -t gcr.io/stoked-reality-284921/excollab-mediaserver:latest --build-arg BUILDKIT_INLINE_CACHE=1 server && \
       docker push gcr.io/stoked-reality-284921/excollab-mediaserver:latest
 - name: 'docker'
-  id: 'Extract assets'
+  id: 'Tarball assets'
   entrypoint: 'sh'
   args:
     - '-c'
@@ -18,7 +18,7 @@ steps:
       docker cp gcr.io/stoked-reality-284921/excollab-mediaserver:latest:/home/opt ./server/dist && \
       tar -zcvf ./dist/$SHORT_SHA.tar.gz ./dist/owt 
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  id: 'Extract assets'
+  id: 'Deploy release'
   entrypoint: 'gcloud'
   args:
     - |
