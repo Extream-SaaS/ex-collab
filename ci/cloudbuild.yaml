@@ -34,7 +34,7 @@ steps:
       compute ssh dev-excollab-mediaserver --command /opt/owt/bin/init-all.sh --deps && /opt/owt/bin/start-all.sh
 timeout: 7200s
 options:
-  machineType: 'N1_HIGHCPU_8'
+  machineType: 'E2_HIGHCPU_8'
 artifacts:
   objects:
     location: gs://ex-cb-artifacts/excollab/server
