@@ -1,0 +1,14 @@
+prefix=/home/owt/analytics_agent/ffmpeg-install
+exec_prefix=${prefix}
+libdir=/home/owt/analytics_agent/ffmpeg-install/lib
+includedir=/home/owt/analytics_agent/ffmpeg-install/include
+
+Name: libswscale
+Description: FFmpeg image rescaling library
+Version: 5.3.100
+Requires: 
+Requires.private: libavutil >= 56.22.100
+Conflicts:
+Libs: -L${libdir}  -lswscale 
+Libs.private: -lm
+Cflags: -I${includedir}

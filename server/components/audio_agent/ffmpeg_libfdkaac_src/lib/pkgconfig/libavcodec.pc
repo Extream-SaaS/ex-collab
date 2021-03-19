@@ -1,0 +1,14 @@
+prefix=/home/owt-server/dist/audio_agent/ffmpeg_libfdkaac_src
+exec_prefix=${prefix}
+libdir=/home/owt-server/dist/audio_agent/ffmpeg_libfdkaac_src/lib
+includedir=/home/owt-server/dist/audio_agent/ffmpeg_libfdkaac_src/include
+
+Name: libavcodec
+Description: FFmpeg codec library
+Version: 58.35.100
+Requires: 
+Requires.private: libswresample >= 3.3.100, libavutil >= 56.22.100
+Conflicts:
+Libs: -L${libdir}  -lavcodec 
+Libs.private: -pthread -lm -lz -L/home/owt-server/dist/audio_agent/ffmpeg_libfdkaac_src/lib -lfdk-aac
+Cflags: -I${includedir}

@@ -1,0 +1,14 @@
+prefix=/home/owt-server/dist/audio_agent/ffmpeg_libfdkaac_src
+exec_prefix=${prefix}
+libdir=/home/owt-server/dist/audio_agent/ffmpeg_libfdkaac_src/lib
+includedir=/home/owt-server/dist/audio_agent/ffmpeg_libfdkaac_src/include
+
+Name: libswresample
+Description: FFmpeg audio resampling library
+Version: 3.3.100
+Requires: 
+Requires.private: libavutil >= 56.22.100
+Conflicts:
+Libs: -L${libdir}  -lswresample 
+Libs.private: -lm
+Cflags: -I${includedir}

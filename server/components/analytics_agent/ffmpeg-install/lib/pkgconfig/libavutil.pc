@@ -1,0 +1,14 @@
+prefix=/home/owt/analytics_agent/ffmpeg-install
+exec_prefix=${prefix}
+libdir=/home/owt/analytics_agent/ffmpeg-install/lib
+includedir=/home/owt/analytics_agent/ffmpeg-install/include
+
+Name: libavutil
+Description: FFmpeg utility library
+Version: 56.22.100
+Requires: 
+Requires.private: 
+Conflicts:
+Libs: -L${libdir}  -lavutil 
+Libs.private: -pthread -lm
+Cflags: -I${includedir}

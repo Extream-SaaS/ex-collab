@@ -1,0 +1,1 @@
+config:x86:x86_64:generic:linux:gcc 7 (Ubuntu 7.5.0-3ubuntu1~18.04):--prefix=/home/owt-server/dist/audio_agent/ffmpeg_libfdkaac_src --enable-shared --disable-static --disable-libvpx --disable-vaapi --enable-libfdk-aac --enable-nonfree --enable-libfreetype

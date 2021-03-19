@@ -1,0 +1,14 @@
+prefix=/home/owt-server/dist/audio_agent/ffmpeg_libfdkaac_src
+exec_prefix=${prefix}
+libdir=/home/owt-server/dist/audio_agent/ffmpeg_libfdkaac_src/lib
+includedir=/home/owt-server/dist/audio_agent/ffmpeg_libfdkaac_src/include
+
+Name: libavutil
+Description: FFmpeg utility library
+Version: 56.22.100
+Requires: 
+Requires.private: 
+Conflicts:
+Libs: -L${libdir}  -lavutil 
+Libs.private: -pthread -lm
+Cflags: -I${includedir}

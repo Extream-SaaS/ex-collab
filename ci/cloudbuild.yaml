@@ -1,42 +1,26 @@
 steps:
-- name: 'gcr.io/kaniko-project/executor:latest'
-  args:
-  - --destination=gcr.io/stoked-reality-284921/excollab-mediaserver:latest
-  - --cache=true
-  - --cache-ttl=14400h
-  - --context=server
-# - name: 'docker'
-#   id: 'Build and Push'
-#   entrypoint: 'sh'
-#   args:
-#     - '-c'
-#     - |
-#       export DOCKER_BUILDKIT=1 && \
-#       docker pull gcr.io/stoked-reality-284921/excollab-mediaserver:latest && \
-#       docker build -f server/Dockerfile -t gcr.io/stoked-reality-284921/excollab-mediaserver:latest --build-arg BUILDKIT_INLINE_CACHE=1 server && \
-#       docker push gcr.io/stoked-reality-284921/excollab-mediaserver:latest
-- name: 'docker'
+- name: 'bash'
   id: 'Tarball assets'
   entrypoint: 'sh'
   args:
     - '-c'
     - |
-      docker cp gcr.io/stoked-reality-284921/excollab-mediaserver:latest:/home/opt ./server/dist && \
-      tar -zcvf ./dist/$SHORT_SHA.tar.gz ./dist/owt 
+      tar -zcvf ./dist/$SHORT_SHA.tar.gz ./components
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   id: 'Deploy release'
   entrypoint: 'gcloud'
   args:
     - |
+      compute ssh dev-excollab-mediaserver --command "sudo mkdir /home/owt && chmod 777 /home/owt" && \
       compute scp ./dist/$SHORT_SHA.tar.gz dev-excollab-mediaserver:/home/owt/releases && \
       compute ssh dev-excollab-mediaserver --command "sudo tar -zxvf /home/owt/releases/$SHORT_SHA.tar.gz ./ && sudo rm /opt/owt && sudo ln -s /home/owt/releases/$SHORT_SHA/ /opt/owt" && \
       compute ssh dev-excollab-mediaserver --command "sudo rm -rf /opt/owt/management_api/cert/certificate.pfx && sudo cp /opt/owt-cert/certificate.pfx /opt/owt/management_api/cert && sudo rm -rf /opt/owt/management_console/cert/certificate.pfx && sudo cp /opt/owt-cert/certificate.pfx /opt/owt/management_console/cert && sudo rm -rf /opt/owt/webrtc_agent/cert/certificate.pfx && sudo cp /opt/owt-cert/certificate.pfx /opt/owt/webrtc_agent/cert && sudo rm -rf /opt/owt/portal/cert/certificate.pfx && sudo cp /opt/owt-cert/certificate.pfx /opt/owt/portal/cert" && \
-      # NOT NEEDED UNLESS A NEW INSTANCE
-      compute ssh dev-excollab-mediaserver --command "sudo /opt/owt/bin/init-all.sh --deps"
+      compute ssh dev-excollab-mediaserver --command "sudo cp /opt/owt-cert/.owt.keystore /opt/owt/management_api/cert && sudo cp /opt/owt-cert/.owt.keystore /opt/owt/management_console/cert && sudo cp /opt/owt-cert/.owt.keystore /opt/owt/webrtc_agent/cert && sudo cp /opt/owt-cert/.owt.keystore /opt/owt/portal/cert" && \
+      compute ssh dev-excollab-mediaserver --command "sudo /opt/owt/bin/init-all.sh --deps" && \
       compute ssh dev-excollab-mediaserver --command "sudo /opt/owt/bin/start-all.sh"
 timeout: 7200s
 options:
-  machineType: 'E2_HIGHCPU_32'
+  machineType: 'N1_HIGHCPU_32'
 artifacts:
   objects:
     location: gs://ex-cb-artifacts/excollab/server
